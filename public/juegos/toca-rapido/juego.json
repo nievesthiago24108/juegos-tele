@@ -1,0 +1,14 @@
+{
+  "id": "toca-rapido",
+  "nombre": "Tocá rápido",
+  "descripcion": "10 segundos para hacer la mayor cantidad de clics o toques.",
+  "orden": 90,
+  "archivos": ["juego.js"],
+  "modos": [
+    { "id": "solo", "nombre": "Solo", "celulares": false },
+    { "id": "celus", "nombre": "Con celulares", "celulares": true, "min": 1, "max": 6 }
+  ],
+  "rankings": [
+    { "id": "toques", "titulo": "Más toques en 10 segundos", "unidad": "toques" }
+  ]
+}

@@ -1,0 +1,52 @@
+# Una palabra por renglón. Se compara sin tildes, sin mayúsculas y detectando
+# reemplazos como 4→a, 3→e, 0→o, 1→i, 5→s, 7→t y letras repetidas ("puuuto").
+# Una palabra prohibida rechaza el nombre si aparece como palabra suelta; las de 5 letras
+# o más también si el nombre empieza con ella ("boludos"). Se puede editar en cualquier momento.
+puto
+puta
+trolo
+trola
+pija
+poronga
+concha
+conchudo
+conchuda
+chota
+culo
+orto
+ojete
+mierda
+boludo
+boluda
+pelotudo
+pelotuda
+forro
+forra
+garca
+sorete
+verga
+pene
+coger
+cogida
+pajero
+pajera
+culiado
+culiao
+cagon
+cagona
+mogolico
+mogolica
+tarado
+tarada
+idiota
+imbecil
+estupido
+estupida
+hdp
+ptm
+lpm
+sexo
+porno
+nazi
+hitler
+violador

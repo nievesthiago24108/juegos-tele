@@ -1,0 +1,17 @@
+{
+  "id": "penales",
+  "nombre": "Penales",
+  "descripcion": "Deslizá para patear: dirección, altura, fuerza y comba. ¿Le ganás al arquero?",
+  "orden": 20,
+  "archivos": ["logica.js", "juego.js"],
+  "modos": [
+    { "id": "solo", "nombre": "Solo", "celulares": false },
+    { "id": "uno", "nombre": "1 contra 1", "celulares": true, "min": 2, "max": 2 },
+    { "id": "torneo", "nombre": "Torneo", "celulares": true, "min": 2, "max": 6 }
+  ],
+  "rankings": [
+    { "id": "seguidos", "titulo": "Más goles seguidos (solo)", "unidad": "seguidos" },
+    { "id": "torneo", "titulo": "Ganadores de torneo", "unidad": "goles" },
+    { "id": "arquero", "titulo": "Efectividad como arquero (mín. 5 tiros)", "unidad": "%", "formato": "porcentaje" }
+  ]
+}

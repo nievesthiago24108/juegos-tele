@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Juegos · Tele</title>
+  <link rel="stylesheet" href="/shared/tema.css">
+  <link rel="stylesheet" href="tele.css">
+</head>
+<body>
+  <div id="escenario" aria-live="polite">
+    <canvas id="lienzo" width="1080" height="1920"></canvas>
+
+    <!-- Menú principal -->
+    <section id="menu" class="capa">
+      <header class="cabecera">
+        <div class="marca" id="marca"></div>
+        <div class="titulos">
+          <div class="escuela" id="escuela"></div>
+          <h1>Juegos</h1>
+        </div>
+      </header>
+
+      <div class="bloque">
+        <h2 class="rotulo">Elegí un juego</h2>
+        <ul id="lista-juegos" class="juegos"></ul>
+      </div>
+
+      <div class="fila-qr">
+        <div class="qr-caja">
+          <img id="qr" alt="Código QR para entrar con el celular">
+        </div>
+        <div class="qr-texto">
+          <h2 class="rotulo">Jugá con tu celu</h2>
+          <p class="grande">Escaneá el código con la cámara</p>
+          <p class="url" id="url"></p>
+          <p class="nota">Si tu celu dice que esta red no tiene internet, tocá «Mantener conexión».</p>
+        </div>
+      </div>
+
+      <div class="bloque">
+        <h2 class="rotulo">Jugadores <span id="cant-jugadores"></span></h2>
+        <ul id="jugadores" class="jugadores"></ul>
+      </div>
+
+      <div class="bloque" id="bloque-record">
+        <h2 class="rotulo">Mejores de hoy · <span id="record-juego"></span></h2>
+        <ol id="record" class="mini-ranking"></ol>
+      </div>
+
+      <footer class="teclas" id="teclas">
+        <span><kbd>↑</kbd><kbd>↓</kbd> juego</span>
+        <span><kbd>←</kbd><kbd>→</kbd> modo</span>
+        <span><kbd>Enter</kbd> jugar</span>
+        <span><kbd>Esc</kbd> volver</span>
+        <span><kbd>F</kbd> pantalla completa</span>
+        <span><kbd>O</kbd> girar</span>
+      </footer>
+      <div class="creditos" id="creditos"></div>
+    </section>
+
+    <!-- Resultados -->
+    <section id="resultados" class="capa oculto">
+      <div class="res-cabeza">
+        <div class="rotulo" id="res-juego"></div>
+        <h1 id="res-titulo"></h1>
+        <p id="res-subtitulo" class="grande"></p>
+      </div>
+      <ol id="res-filas" class="res-filas"></ol>
+      <p id="res-guardado" class="res-guardado"></p>
+      <div class="botones-fila">
+        <button id="btn-otra" class="boton primario"><kbd>Enter</kbd> Jugar otra vez</button>
+        <button id="btn-menu" class="boton"><kbd>Esc</kbd> Volver al menú</button>
+      </div>
+    </section>
+
+    <!-- Teclado en pantalla para el nombre (modo solo) -->
+    <section id="teclado" class="capa oculto">
+      <div class="res-cabeza">
+        <div class="rotulo" id="tec-juego"></div>
+        <h1 id="tec-titulo"></h1>
+        <p class="grande">Escribí tu nombre para el ranking</p>
+      </div>
+      <div class="nombre-caja"><span id="tec-nombre"></span><span class="cursor">_</span></div>
+      <p class="tec-ayuda" id="tec-ayuda">De 2 a 14 letras. Usá el mouse o el teclado.</p>
+      <div id="tec-teclas" class="tec-teclas"></div>
+      <div class="botones-fila">
+        <button id="tec-listo" class="boton primario"><kbd>Enter</kbd> Guardar</button>
+        <button id="tec-saltar" class="boton"><kbd>Esc</kbd> No guardar</button>
+      </div>
+    </section>
+
+    <div id="cartel" class="cartel oculto"></div>
+  </div>
+
+  <div id="bloqueo" class="bloqueo oculto">
+    <p>Esta tele se abrió en otra pestaña o en otra compu.</p>
+    <button onclick="location.reload()">Usar esta</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/shared/sonido.js"></script>
+  <script src="/shared/formas.js"></script>
+  <script src="/shared/trazo.js"></script>
+  <script src="/shared/dibujo.js"></script>
+  <script src="tele.js"></script>
+</body>
+</html>

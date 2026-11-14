@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0B1D30">
+  <title>Juegos · Ranking</title>
+  <link rel="stylesheet" href="/shared/tema.css">
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; background: var(--noche); }
+    body { min-height: 100vh; color: var(--blanco); font-family: var(--texto); }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: max(18px, env(safe-area-inset-top)) 16px 40px; }
+    header { padding-bottom: 14px; border-bottom: 4px solid var(--azul); }
+    .escuela { font-family: var(--titulo); color: var(--celeste); font-weight: 600; font-size: 15px; letter-spacing: 2px; text-transform: uppercase; }
+    h1 { margin: 2px 0 0; font-family: var(--titulo); font-size: clamp(40px, 10vw, 64px); font-weight: 800; letter-spacing: 6px; line-height: 1; text-transform: uppercase; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid var(--linea); position: sticky; top: 0; background: var(--noche); z-index: 2; }
+    .tabs button {
+      font-family: var(--titulo); font-size: 18px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; border: 0;
+      border-bottom: 3px solid transparent; background: transparent; color: var(--gris); padding: 16px 14px 13px; cursor: pointer;
+    }
+    .tabs button[aria-selected="true"] { color: var(--blanco); border-bottom-color: var(--naranja); }
+    .tabs button:focus-visible { outline: 3px solid var(--celeste); outline-offset: -3px; }
+    h2 { font-family: var(--titulo); font-size: 30px; font-weight: 800; margin: 30px 0 4px; letter-spacing: 1px; }
+    .tablas { display: grid; grid-template-columns: 1fr; gap: 18px; }
+    @media (min-width: 820px) { .tablas { grid-template-columns: repeat(3, 1fr); } }
+    h3 { font-family: var(--titulo); color: var(--gris); font-size: 15px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin: 12px 0 6px; }
+    ol { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--linea); }
+    li { display: grid; grid-template-columns: 36px 1fr auto; gap: 10px; align-items: center; min-height: 54px; padding: 6px 6px; border-bottom: 1px solid var(--linea); }
+    li.p1 { background: var(--panel); box-shadow: inset 4px 0 0 var(--naranja); }
+    .pos { width: 30px; height: 30px; display: grid; place-items: center; font-family: var(--titulo); font-weight: 800; color: var(--gris); }
+    li.p1 .pos { background: var(--naranja); color: var(--noche); }
+    .nom { font-weight: 700; font-size: 17px; min-width: 0; overflow-wrap: anywhere; }
+    .nom small { display: block; color: var(--gris); font-size: 12px; font-weight: 600; }
+    .val { font-family: var(--titulo); font-size: 24px; font-weight: 800; white-space: nowrap; }
+    .vacio { color: var(--gris); font-weight: 600; padding: 18px 6px; display: block; }
+    footer { text-align: center; color: var(--gris); font-size: 13px; font-weight: 600; margin-top: 30px; }
+    .creditos { font-family: var(--titulo); letter-spacing: 3px; text-transform: uppercase; font-weight: 700; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="escuela" id="escuela"></div>
+      <h1>Ranking</h1>
+    </header>
+    <nav class="tabs" id="tabs" role="tablist"></nav>
+    <main id="contenido"><p class="vacio">Cargando…</p></main>
+    <footer>Se actualiza solo cada 15 segundos.<div class="creditos" id="creditos"></div></footer>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      let datos = [];
+      let elegido = new URLSearchParams(location.search).get('juego') || null;
+      const TABLAS = [['hoy', 'Hoy'], ['semana', 'Últimos 7 días'], ['siempre', 'Siempre']];
+
+      function formatear(rk, x) {
+        if (rk.formato === 'nivel') return `Nivel ${Math.floor(x.puntaje / 100)}`;
+        if (rk.formato === 'porcentaje') return `${x.puntaje}%`;
+        return `${x.puntaje} ${rk.unidad}`;
+      }
+      function detalle(rk, x) {
+        const partes = [];
+        if (x.jugadores && x.jugadores.length > 1) partes.push('Equipo');
+        if (rk.formato === 'nivel') partes.push(`${x.puntaje} pts`);
+        if (x.detalle && x.detalle.texto) partes.push(x.detalle.texto);
+        partes.push(x.fecha.slice(8, 10) + '/' + x.fecha.slice(5, 7) + ' ' + x.fecha.slice(11, 16));
+        return partes.join(' · ');
+      }
+
+      function render() {
+        if (!datos.length) { document.getElementById('contenido').innerHTML = '<p class="vacio">No hay juegos.</p>'; return; }
+        if (!datos.some((j) => j.id === elegido)) elegido = datos[0].id;
+        document.getElementById('tabs').innerHTML = datos.map((j) =>
+          `<button role="tab" aria-selected="${j.id === elegido}" data-id="${esc(j.id)}">${esc(j.nombre)}</button>`).join('');
+        const j = datos.find((x) => x.id === elegido);
+        document.getElementById('contenido').innerHTML = j.rankings.map((rk) => `<section><h2>${esc(rk.titulo)}</h2><div class="tablas">` +
+          TABLAS.map(([k, t]) => `<div><h3>${t}</h3><ol>` + (rk[k].length ? rk[k].map((x) =>
+            `<li class="p${x.puesto}"><span class="pos">${x.puesto}</span><span class="nom">${esc(x.nombre)}<small>${esc(detalle(rk, x))}</small></span><span class="val">${esc(formatear(rk, x))}</span></li>`).join('')
+            : '<li><span class="vacio" style="grid-column:1/-1">Todavía nadie.</span></li>') + '</ol></div>').join('') + '</div></section>').join('');
+      }
+      document.getElementById('tabs').addEventListener('click', (e) => {
+        const b = e.target.closest('button[data-id]');
+        if (!b) return;
+        elegido = b.dataset.id;
+        history.replaceState(null, '', '?juego=' + encodeURIComponent(elegido));
+        render();
+      });
+      async function cargar() {
+        try {
+          const r = await fetch('/api/ranking?n=10').then((x) => x.json());
+          datos = r.juegos || [];
+          render();
+        } catch { /* se reintenta en el próximo ciclo */ }
+      }
+      fetch('/api/config').then((r) => r.json()).then((c) => {
+        document.getElementById('escuela').textContent = c.nombreEscuela;
+        document.getElementById('creditos').textContent = c.creditos;
+      }).catch(() => {});
+      cargar();
+      setInterval(cargar, 15000);
+      try { io({ transports: ['websocket', 'polling'] }).on('ranking:cambio', cargar); } catch { /* sin socket: queda el intervalo */ }
+    })();
+  </script>
+</body>
+</html>

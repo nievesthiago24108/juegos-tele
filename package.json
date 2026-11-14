@@ -1,0 +1,28 @@
+{
+  "name": "juegos-tele",
+  "version": "1.0.0",
+  "description": "Juegos para una tele vertical (1080x1920) con celulares como control, sin internet",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test \"test/*.test.js\"",
+    "sim": "node test/sim-penales.js",
+    "capturas:base": "node test/pw-base.js",
+    "capturas:memoria": "node test/pw-memoria.js",
+    "capturas:penales": "node test/pw-penales.js",
+    "prueba:final": "node test/pw-final.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@fontsource/barlow": "^5.3.0",
+    "@fontsource/barlow-condensed": "^5.3.0",
+    "express": "^5.3.0",
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.8.4"
+  },
+  "devDependencies": {
+    "playwright": "1.49.1",
+    "socket.io-client": "^4.8.4"
+  }
+}

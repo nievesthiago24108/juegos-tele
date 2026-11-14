@@ -1,0 +1,27 @@
+/*
+ * Tema "Institucional Nº4": tipografías Barlow (servidas desde node_modules, sin internet)
+ * y la paleta del logo de la escuela. Lo usan la tele, el celular y /ranking.
+ */
+@font-face { font-family: 'Barlow'; font-weight: 400; font-display: swap; src: url('/fonts/barlow/barlow-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow'; font-weight: 600; font-display: swap; src: url('/fonts/barlow/barlow-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow'; font-weight: 700; font-display: swap; src: url('/fonts/barlow/barlow-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow Condensed'; font-weight: 600; font-display: swap; src: url('/fonts/barlow-condensed/barlow-condensed-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow Condensed'; font-weight: 700; font-display: swap; src: url('/fonts/barlow-condensed/barlow-condensed-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow Condensed'; font-weight: 800; font-display: swap; src: url('/fonts/barlow-condensed/barlow-condensed-latin-800-normal.woff2') format('woff2'); }
+
+:root {
+  --noche: #0B1D30;      /* fondo */
+  --panel: #13314F;      /* paneles */
+  --panel-2: #1A3C5E;    /* paneles resaltados */
+  --azul: #6272B4;       /* acento principal (azul del logo) */
+  --celeste: #7AB6E6;    /* líneas y secundario (celeste del logo) */
+  --blanco: #F4F8FB;     /* texto */
+  --gris: #90A7BC;       /* texto secundario (≥ 4,5:1 sobre noche y paneles) */
+  --naranja: #F2A33A;    /* plenos, récords, urgente */
+  --rojo: #F46C70;       /* texto de error (≥ 4,5:1) */
+  --rojo-fondo: #C93A3F; /* fondo de botones peligrosos, con texto blanco */
+  --azul-boton: #5868AA; /* fondo de botones con texto blanco (≥ 4,5:1) */
+  --linea: rgba(122, 182, 230, 0.22);
+  --texto: 'Barlow', 'Segoe UI', Arial, sans-serif;
+  --titulo: 'Barlow Condensed', 'Arial Narrow', 'Segoe UI', sans-serif;
+}

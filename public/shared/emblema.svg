@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="345" height="345" viewBox="0 0 345 345" role="img" aria-label="Escuela Industrial Nº4 José Menéndez">
+  <!-- Logo de la Escuela Industrial Nº4 "José Menéndez" (Río Gallegos), redibujado en vector
+       a partir del logo del sitio oficial de la escuela (sites.google.com/view/escuelaindustrial4). -->
+  <defs>
+    <clipPath id="bloque"><polygon points="124,46 222,46 148,213 56,213"/></clipPath>
+  </defs>
+  <circle cx="171" cy="172" r="165" fill="#FFFFFF" stroke="#A0A0A0" stroke-width="4"/>
+  <polygon points="124,46 222,46 148,213 56,213" fill="#7AB6E6"/>
+  <g clip-path="url(#bloque)" fill="#FFFFFF">
+    <rect x="40" y="96.5" width="200" height="2.5"/>
+    <rect x="40" y="149.5" width="200" height="2.5"/>
+  </g>
+  <polygon points="197,99 148,213 82,213" fill="#6272B4"/>
+  <rect x="256" y="99" width="7.5" height="86" fill="#000000"/>
+  <polygon points="206,99 263,99 180,299 119,299" fill="#6272B4"/>
+  <rect x="93" y="224" width="124" height="7" fill="#000000"/>
+  <path d="M256 224 H290 V231 H263 V273 H217 V266 H256 Z" fill="#000000"/>
+  <rect x="283" y="194" width="7" height="37" fill="#000000"/>
+</svg>

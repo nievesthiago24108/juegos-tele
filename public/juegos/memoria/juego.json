@@ -1,0 +1,17 @@
+{
+  "id": "memoria",
+  "nombre": "Memoria de colores",
+  "descripcion": "Mirá la secuencia de colores y repetila. Cada nivel suma un color.",
+  "orden": 10,
+  "archivos": ["logica.js", "juego.js"],
+  "modos": [
+    { "id": "solo", "nombre": "Solo", "celulares": false },
+    { "id": "eliminacion", "nombre": "Eliminación", "celulares": true, "min": 2, "max": 6 },
+    { "id": "cooperativo", "nombre": "Cooperativo", "celulares": true, "min": 2, "max": 4 }
+  ],
+  "rankings": [
+    { "id": "individual", "titulo": "Mejor nivel individual", "unidad": "puntos", "formato": "nivel" },
+    { "id": "equipo", "titulo": "Mejor nivel en equipo", "unidad": "puntos", "formato": "nivel" }
+  ],
+  "servidor": "servidor.js"
+}

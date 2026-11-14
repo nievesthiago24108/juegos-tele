@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0B1D30">
+  <title>Juegos · Control</title>
+  <link rel="stylesheet" href="/shared/tema.css">
+  <link rel="stylesheet" href="celu.css">
+</head>
+<body>
+  <div id="conexion" class="conexion oculto">Reconectando…</div>
+
+  <!-- Entrar a la sala -->
+  <main id="pant-unirse" class="pantalla">
+    <header class="cabeza">
+      <div class="escuela" id="escuela"></div>
+      <h1>Juegos</h1>
+    </header>
+    <form id="form-unirse" autocomplete="off">
+      <label for="nombre">Tu nombre</label>
+      <input id="nombre" maxlength="14" minlength="2" placeholder="Ej: Lucía" autocapitalize="words" enterkeyhint="go" required>
+      <p id="error-unirse" class="error" role="alert"></p>
+      <button class="boton primario" type="submit" id="btn-entrar">Entrar</button>
+    </form>
+    <p class="aviso">Si tu celu dice que esta red no tiene internet, tocá «Mantener conexión».</p>
+  </main>
+
+  <!-- Sala de espera / menú del anfitrión -->
+  <main id="pant-sala" class="pantalla oculto">
+    <header class="yo">
+      <span class="punto" id="yo-color"></span>
+      <div>
+        <div class="rotulo" id="yo-rol">Jugador</div>
+        <div class="yo-nombre" id="yo-nombre"></div>
+      </div>
+      <button class="link" id="btn-salir">Salir</button>
+    </header>
+    <section id="sala-espera">
+      <p class="grande">Mirá la tele</p>
+      <p class="sub" id="sala-texto">Esperando que el anfitrión elija un juego…</p>
+    </section>
+    <section id="sala-anfitrion" class="oculto">
+      <p class="sub">Sos el anfitrión: elegí a qué juegan.</p>
+      <div id="lista-juegos"></div>
+    </section>
+    <h2 class="rotulo">En la sala</h2>
+    <ul id="sala-jugadores" class="jugadores"></ul>
+  </main>
+
+  <!-- Control del juego -->
+  <main id="pant-control" class="pantalla control oculto">
+    <header class="yo chico">
+      <span class="punto" id="ctl-color"></span>
+      <div class="yo-nombre" id="ctl-nombre"></div>
+      <button class="link oculto" id="btn-menu-anf">Menú</button>
+    </header>
+    <div class="ctl-textos">
+      <h2 id="ctl-titulo"></h2>
+      <p id="ctl-mensaje" class="sub"></p>
+    </div>
+    <div id="ctl-area" class="ctl-area"></div>
+    <div id="ctl-anfitrion" class="anf-fin oculto">
+      <button class="boton primario" id="btn-otra">Jugar otra vez</button>
+      <button class="boton" id="btn-volver">Volver al menú</button>
+    </div>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/shared/formas.js"></script>
+  <script src="/shared/trazo.js"></script>
+  <script src="celu.js"></script>
+</body>
+</html>
