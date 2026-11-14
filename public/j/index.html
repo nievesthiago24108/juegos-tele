@@ -9,60 +9,60 @@
   <link rel="stylesheet" href="celu.css">
 </head>
 <body>
-  <div id="conexion" class="conexion oculto">Reconectando…</div>
+  <div id="conexion" class="conexion oculto">Sin conexión. Reconectando…</div>
 
   <!-- Entrar a la sala -->
   <main id="pant-unirse" class="pantalla">
-    <header class="cabeza">
-      <div class="escuela" id="escuela"></div>
-      <h1>Juegos</h1>
-    </header>
-    <form id="form-unirse" autocomplete="off">
-      <label for="nombre">Tu nombre</label>
-      <input id="nombre" maxlength="14" minlength="2" placeholder="Ej: Lucía" autocapitalize="words" enterkeyhint="go" required>
+    <div class="marca grande"><img src="/shared/emblema.svg" alt="" data-logo><div class="escuela" data-escuela></div></div>
+    <h1>Juegos</h1>
+    <form id="form-unirse" class="crece centro" autocomplete="off">
+      <label for="nombre">¿Cómo te llamás?</label>
+      <input id="nombre" type="text" maxlength="14" placeholder="Tu nombre" autocapitalize="words" enterkeyhint="go" spellcheck="false">
       <p id="error-unirse" class="error" role="alert"></p>
-      <button class="boton primario" type="submit" id="btn-entrar">Entrar</button>
+      <button class="boton grande" type="submit" id="btn-entrar">Entrar</button>
     </form>
     <p class="aviso">Si tu celu dice que esta red no tiene internet, tocá «Mantener conexión».</p>
+    <p class="sub centrado">De 2 a 14 letras o números. Tu nombre va a aparecer en el ranking.</p>
+    <div class="creditos" data-creditos></div>
   </main>
 
   <!-- Sala de espera / menú del anfitrión -->
   <main id="pant-sala" class="pantalla oculto">
-    <header class="yo">
-      <span class="punto" id="yo-color"></span>
-      <div>
-        <div class="rotulo" id="yo-rol">Jugador</div>
-        <div class="yo-nombre" id="yo-nombre"></div>
-      </div>
-      <button class="link" id="btn-salir">Salir</button>
-    </header>
+    <div class="marca"><img src="/shared/emblema.svg" alt="" data-logo><div class="escuela" data-escuela></div></div>
+    <div class="tarjeta yo" id="yo-tarjeta">
+      <span class="yo-nombre" id="yo-nombre"></span>
+      <span class="tag" id="yo-rol"></span>
+      <button class="fantasma" id="btn-salir">Salir</button>
+    </div>
     <section id="sala-espera">
-      <p class="grande">Mirá la tele</p>
+      <div class="estado">Ya estás adentro</div>
       <p class="sub" id="sala-texto">Esperando que el anfitrión elija un juego…</p>
     </section>
     <section id="sala-anfitrion" class="oculto">
-      <p class="sub">Sos el anfitrión: elegí a qué juegan.</p>
+      <div class="estado">Elegí a qué juegan</div>
+      <p class="sub">Sos el anfitrión. La partida empieza en la tele.</p>
       <div id="lista-juegos"></div>
     </section>
-    <h2 class="rotulo">En la sala</h2>
+    <div class="seccion">Jugadores</div>
     <ul id="sala-jugadores" class="jugadores"></ul>
+    <a class="link" href="/ranking/" target="_blank" rel="noopener">Ver ranking</a>
   </main>
 
   <!-- Control del juego -->
   <main id="pant-control" class="pantalla control oculto">
-    <header class="yo chico">
-      <span class="punto" id="ctl-color"></span>
-      <div class="yo-nombre" id="ctl-nombre"></div>
-      <button class="link oculto" id="btn-menu-anf">Menú</button>
+    <header class="barra">
+      <span class="barra-color" id="ctl-color"></span>
+      <div class="barra-textos">
+        <div class="barra-titulo" id="ctl-titulo"></div>
+        <div class="barra-info" id="ctl-nombre"></div>
+      </div>
+      <button class="fantasma oculto" id="btn-menu-anf">Menú</button>
     </header>
-    <div class="ctl-textos">
-      <h2 id="ctl-titulo"></h2>
-      <p id="ctl-mensaje" class="sub"></p>
-    </div>
+    <p id="ctl-mensaje" class="sub centrado ctl-mensaje"></p>
     <div id="ctl-area" class="ctl-area"></div>
     <div id="ctl-anfitrion" class="anf-fin oculto">
-      <button class="boton primario" id="btn-otra">Jugar otra vez</button>
-      <button class="boton" id="btn-volver">Volver al menú</button>
+      <button class="boton" id="btn-otra">Jugar otra vez</button>
+      <button class="boton secundario" id="btn-volver">Volver al menú</button>
     </div>
   </main>
 

@@ -6,6 +6,8 @@
   'use strict';
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  // en la interfaz no van signos de exclamación: "¡Ganaste!" → "Ganaste"
+  const sinExclamar = (t) => String(t || '').replace(/^¡\s*/, '').replace(/\s*!$/, '');
   const CLAVE = 'juegos-tele:jugador';
 
   const yo = { id: null, nombre: null, color: null, token: null };
@@ -107,9 +109,9 @@
   function render() {
     if (!yo.id) { mostrar('unirse'); return; }
     const anf = soyAnfitrion();
+    document.documentElement.style.setProperty('--yo', yo.color || '#3FB6E0');
     if (control && sala.fase !== 'menu') {
       mostrar('control');
-      $('ctl-color').style.background = yo.color;
       $('ctl-nombre').textContent = yo.nombre;
       $('btn-menu-anf').classList.toggle('oculto', !anf || sala.fase !== 'jugando');
       $('ctl-anfitrion').classList.toggle('oculto', !(anf && sala.fase === 'resultados'));
@@ -117,15 +119,16 @@
       return;
     }
     mostrar('sala');
-    $('yo-color').style.background = yo.color;
     $('yo-nombre').textContent = yo.nombre;
-    $('yo-rol').textContent = anf ? 'Anfitrión' : 'Jugador';
+    $('yo-rol').textContent = anf ? 'Anfitrión' : '';
     $('sala-espera').classList.toggle('oculto', anf && sala.fase === 'menu');
     $('sala-anfitrion').classList.toggle('oculto', !(anf && sala.fase === 'menu'));
     $('sala-texto').textContent = !sala.teleConectada ? 'La tele no está conectada.'
       : sala.fase === 'menu' ? 'Esperando que el anfitrión elija un juego…' : 'Hay una partida en curso.';
     $('sala-jugadores').innerHTML = (sala.jugadores || []).map((j) =>
-      `<li class="${j.conectado ? '' : 'fuera'}"><span class="punto" style="background:${esc(j.color)}"></span>${esc(j.nombre)}${j.id === yo.id ? ' (vos)' : ''}</li>`).join('');
+      `<li class="${j.conectado ? '' : 'fuera'}"><span class="cuadro" style="background:${esc(j.color)}"></span>` +
+      `<span class="nom">${esc(j.nombre)}${j.id === yo.id ? ' (vos)' : ''}</span>` +
+      `${j.anfitrion ? '<span class="tag">Anfitrión</span>' : j.conectado ? '' : '<span class="tag">Sin conexión</span>'}</li>`).join('');
     if (anf && sala.fase === 'menu') dibujarMenuAnfitrion();
   }
 
@@ -139,7 +142,7 @@
     $('lista-juegos').innerHTML = juegos.map((j) => `<div class="anf-juego"><h3>${esc(j.nombre)}</h3><p>${esc(j.descripcion)}</p><div class="anf-modos">` +
       j.modos.map((m) => {
         const falta = m.celulares ? Math.max(0, m.min - n) : 0;
-        const det = m.celulares ? (falta ? `faltan ${falta}` : `${m.min}–${m.max} celus`) : 'en la tele, con mouse';
+        const det = m.celulares ? (falta ? `faltan ${falta}` : (m.min === m.max ? `${m.min} celulares` : `${m.min} a ${m.max} celulares`)) : 'en la tele, con mouse';
         return `<button data-j="${esc(j.id)}" data-m="${esc(m.id)}" ${falta ? 'disabled' : ''}>${esc(m.nombre)}<small>${esc(det)}</small></button>`;
       }).join('') + '</div></div>').join('');
   }
@@ -160,7 +163,7 @@
 
   function dibujarControl() {
     const c = control;
-    $('ctl-titulo').textContent = c.titulo || '';
+    $('ctl-titulo').textContent = sinExclamar(c.titulo) || 'Mirá la tele';
     $('ctl-mensaje').textContent = c.mensaje || '';
     const clave = JSON.stringify(c);
     if (clave === controlDibujado && c.tipo !== 'zonas') return; // no rehacer (perdería el trazo en curso)
@@ -169,7 +172,7 @@
     if (c.tipo === 'botones') return dibujarBotones(area, c);
     if (c.tipo === 'zonas') return dibujarZonas(area, c);
     if (c.tipo === 'deslizar') return dibujarDeslizar(area, c);
-    area.innerHTML = `<div class="espera"><p class="grande">${esc(c.grande || 'Mirá la tele')}</p></div>`;
+    area.innerHTML = `<div class="espera"><div class="estado">${esc(sinExclamar(c.grande) || 'Mirá la tele')}</div></div>`;
   }
 
   function dibujarBotones(area, c) {
@@ -293,7 +296,7 @@
       const t0 = norm[0].t;
       enviar({ trazo: Trazo.simplificar(norm, 28).map((p) => ({ x: +p.x.toFixed(4), y: +p.y.toFixed(4), t: p.t - t0 })) });
       caja.classList.add('listo');
-      $('ctl-mensaje').textContent = '¡Pateaste! Mirá la tele.';
+      $('ctl-mensaje').textContent = 'Pateaste. Mirá la tele.';
       pintar();
     };
     caja.addEventListener('pointerup', soltar);
@@ -303,7 +306,9 @@
 
   // ---------------------------------------------------------------- arranque
   fetch('/api/config').then((r) => r.json()).then((c) => {
-    $('escuela').textContent = c.nombreEscuela;
+    document.querySelectorAll('[data-escuela]').forEach((el) => { el.textContent = c.nombreEscuela; });
+    document.querySelectorAll('[data-creditos]').forEach((el) => { el.textContent = c.creditos; });
+    if (c.logo) document.querySelectorAll('[data-logo]').forEach((el) => { el.src = c.logo; });
     document.documentElement.style.setProperty('--azul', c.colores.principal);
     document.documentElement.style.setProperty('--celeste', c.colores.secundario);
     document.documentElement.style.setProperty('--naranja', c.colores.acento);

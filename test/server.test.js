@@ -50,7 +50,7 @@ test('API: config con QR, juegos y ranking', async () => {
     const c = await (await fetch(t.url + '/api/config')).json();
     assert.match(c.url, /^http:\/\/127\.0\.0\.1:\d+\/j$/);
     assert.match(c.qr, /^data:image\/png;base64,/);
-    assert.equal(c.logo, null);
+    assert.equal(c.logo, '/shared/emblema.svg', 'sin public/logo.png usa el emblema');
     const j = await (await fetch(t.url + '/api/juegos')).json();
     assert.ok(j.some((x) => x.id === 'toca-rapido'));
     const r = await (await fetch(t.url + '/api/ranking')).json();

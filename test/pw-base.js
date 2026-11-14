@@ -94,7 +94,7 @@ const u = require('./pw-util.js');
     u.revisar(rk.includes('Ranking'), '/ranking responde');
     const pr = await browser.newPage({ viewport: { width: 1100, height: 900 } });
     u.vigilar(pr, 'ranking', problemas);
-    await pr.goto(base + '/ranking/');
+    await pr.goto(base + '/ranking/?juego=toca-rapido');
     await pr.waitForSelector('li.p1');
     await pr.screenshot({ path: u.CAPTURAS + '/b12-ranking.png' });
 

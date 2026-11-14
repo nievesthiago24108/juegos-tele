@@ -11,7 +11,8 @@
     html, body { margin: 0; background: var(--noche); }
     body { min-height: 100vh; color: var(--blanco); font-family: var(--texto); }
     .wrap { max-width: 1100px; margin: 0 auto; padding: max(18px, env(safe-area-inset-top)) 16px 40px; }
-    header { padding-bottom: 14px; border-bottom: 4px solid var(--azul); }
+    header { display: flex; align-items: center; gap: 16px; padding-bottom: 14px; border-bottom: 4px solid var(--azul); }
+    header img { width: 72px; height: 72px; flex: none; }
     .escuela { font-family: var(--titulo); color: var(--celeste); font-weight: 600; font-size: 15px; letter-spacing: 2px; text-transform: uppercase; }
     h1 { margin: 2px 0 0; font-family: var(--titulo); font-size: clamp(40px, 10vw, 64px); font-weight: 800; letter-spacing: 6px; line-height: 1; text-transform: uppercase; }
     .tabs { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid var(--linea); position: sticky; top: 0; background: var(--noche); z-index: 2; }
@@ -19,9 +20,10 @@
       font-family: var(--titulo); font-size: 18px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; border: 0;
       border-bottom: 3px solid transparent; background: transparent; color: var(--gris); padding: 16px 14px 13px; cursor: pointer;
     }
-    .tabs button[aria-selected="true"] { color: var(--blanco); border-bottom-color: var(--naranja); }
+    .tabs button[aria-selected="true"] { color: var(--blanco); border-bottom-color: var(--azul); }
     .tabs button:focus-visible { outline: 3px solid var(--celeste); outline-offset: -3px; }
-    h2 { font-family: var(--titulo); font-size: 30px; font-weight: 800; margin: 30px 0 4px; letter-spacing: 1px; }
+    h2 { display: flex; align-items: center; gap: 16px; font-family: var(--titulo); font-size: 22px; font-weight: 700; margin: 32px 0 4px; letter-spacing: 3px; text-transform: uppercase; color: var(--celeste); }
+    h2::after { content: ''; flex: 1; height: 2px; background: var(--linea); }
     .tablas { display: grid; grid-template-columns: 1fr; gap: 18px; }
     @media (min-width: 820px) { .tablas { grid-template-columns: repeat(3, 1fr); } }
     h3 { font-family: var(--titulo); color: var(--gris); font-size: 15px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin: 12px 0 6px; }
@@ -30,6 +32,8 @@
     li.p1 { background: var(--panel); box-shadow: inset 4px 0 0 var(--naranja); }
     .pos { width: 30px; height: 30px; display: grid; place-items: center; font-family: var(--titulo); font-weight: 800; color: var(--gris); }
     li.p1 .pos { background: var(--naranja); color: var(--noche); }
+    li.p2 .pos { background: #C9D3DD; color: var(--noche); }
+    li.p3 .pos { background: #C98A5A; color: var(--noche); }
     .nom { font-weight: 700; font-size: 17px; min-width: 0; overflow-wrap: anywhere; }
     .nom small { display: block; color: var(--gris); font-size: 12px; font-weight: 600; }
     .val { font-family: var(--titulo); font-size: 24px; font-weight: 800; white-space: nowrap; }
@@ -41,8 +45,11 @@
 <body>
   <div class="wrap">
     <header>
-      <div class="escuela" id="escuela"></div>
-      <h1>Ranking</h1>
+      <img src="/shared/emblema.svg" alt="" id="logo">
+      <div>
+        <div class="escuela" id="escuela"></div>
+        <h1>Ranking</h1>
+      </div>
     </header>
     <nav class="tabs" id="tabs" role="tablist"></nav>
     <main id="contenido"><p class="vacio">Cargando…</p></main>
@@ -99,6 +106,7 @@
       fetch('/api/config').then((r) => r.json()).then((c) => {
         document.getElementById('escuela').textContent = c.nombreEscuela;
         document.getElementById('creditos').textContent = c.creditos;
+        if (c.logo) document.getElementById('logo').src = c.logo;
       }).catch(() => {});
       cargar();
       setInterval(cargar, 15000);

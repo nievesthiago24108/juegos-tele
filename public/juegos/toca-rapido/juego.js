@@ -86,23 +86,25 @@
         if (solo) {
           D.texto(ctx, toques.solo, 540, 1080, { tam: 460, alinear: 'center', peso: 800 });
           D.texto(ctx, 'toques', 540, 1180, { tam: 60, alinear: 'center', color: D.PAL.gris });
-          if (fase === 'jugando') D.texto(ctx, '¡Clic, clic, clic!', 540, 1500, { tam: 64, alinear: 'center', color: D.PAL.naranja });
+          if (fase === 'jugando') D.texto(ctx, 'Seguí haciendo clic', 540, 1500, { tam: 64, alinear: 'center', color: D.PAL.naranja });
         } else {
           const max = Math.max(10, ...Object.values(toques));
           jugadores.forEach((j, i) => {
             const y = 400 + i * 220;
-            D.texto(ctx, j.nombre, 60, y, { tam: 52 });
-            D.rect(ctx, 60, y + 24, 960, 110, 4, D.PAL.panel);
-            D.rect(ctx, 60, y + 24, 960 * toques[j.id] / max, 110, 4, j.color);
+            D.texto(ctx, j.nombre, 60, y, { tam: 52, peso: 800 });
+            D.ficha(ctx, 60, y + 24, 960, 110, j.color);
+            ctx.globalAlpha = 0.85;
+            D.rect(ctx, 70, y + 24, 950 * toques[j.id] / max, 110, 0, j.color);
+            ctx.globalAlpha = 1;
             D.texto(ctx, toques[j.id], 1000, y + 106, { tam: 80, alinear: 'right', peso: 800, borde: 8 });
           });
         }
-        if (fase === 'fin') D.texto(ctx, '¡Tiempo!', 540, 1700, { tam: 120, alinear: 'center', color: D.PAL.naranja, peso: 800 });
+        if (fase === 'fin') D.texto(ctx, 'Tiempo', 540, 1700, { tam: 120, alinear: 'center', color: D.PAL.naranja, peso: 800 });
       },
       controlCelular(id) {
-        if (fase === 'jugando') return { tipo: 'botones', id: 'toca', titulo: '¡Tocá!', mensaje: 'Lo más rápido que puedas', columnas: 1, botones: [{ id: 0, color: '#5868AA', texto: 'TOCÁ' }] };
+        if (fase === 'jugando') return { tipo: 'botones', id: 'toca', titulo: 'Tocá', mensaje: 'Lo más rápido que puedas', columnas: 1, botones: [{ id: 0, color: '#5868AA', texto: 'TOCÁ' }] };
         if (fase === 'cuenta') return { tipo: 'espera', id: 'cuenta', titulo: 'Preparate…', mensaje: 'Mirá la tele', grande: 'Ya empieza' };
-        return { tipo: 'espera', id: 'fin', titulo: '¡Tiempo!', mensaje: `Hiciste ${toques[id] || 0} toques`, grande: `${toques[id] || 0}` };
+        return { tipo: 'espera', id: 'fin', titulo: 'Tiempo', mensaje: `Hiciste ${toques[id] || 0} toques`, grande: `${toques[id] || 0}` };
       },
       terminado() { return fase === 'fin' && finEspera > 1.5; },
       resultados() {
@@ -118,9 +120,9 @@
         const orden = jugadores.slice().sort((a, b) => toques[b.id] - toques[a.id]);
         const ganador = orden[0];
         const celular = {};
-        orden.forEach((j, i) => { celular[j.id] = { titulo: i === 0 ? '¡Ganaste!' : `Puesto ${i + 1}`, mensaje: `${toques[j.id]} toques` }; });
+        orden.forEach((j, i) => { celular[j.id] = { titulo: i === 0 ? 'Ganaste' : `Puesto ${i + 1}`, mensaje: `${toques[j.id]} toques` }; });
         return {
-          titulo: jugadores.length > 1 ? `¡Ganó ${ganador.nombre}!` : `${toques[ganador.id]} toques`,
+          titulo: jugadores.length > 1 ? `Ganó ${ganador.nombre}` : `${toques[ganador.id]} toques`,
           subtitulo: 'Toques en 10 segundos',
           filas: orden.map((j, i) => ({ nombre: j.nombre, color: j.color, valor: toques[j.id], destacado: i === 0 })),
           registros: orden.map((j) => ({ categoria: 'toques', puntaje: toques[j.id], jugadorIds: [j.id] })),

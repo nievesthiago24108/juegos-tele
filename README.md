@@ -152,9 +152,9 @@ Todo está en `config.json`. Si algo está mal escrito, se usa el valor por defe
 
 | Campo | Qué es |
 |---|---|
-| `nombreEscuela`, `nombreCorto` | Aparecen en la tele, en los carteles de la cancha de Penales y en el celu. |
+| `nombreEscuela`, `nombreCorto` | El nombre aparece en la tele, en los carteles de la cancha de Penales y en el celu. |
 | `colores.principal`, `secundario`, `acento`, `fondo` | Colores de la escuela, como `"#6272B4"`. Se usan en la tele, en las camisetas de Penales y en los carteles. |
-| `logo` | Ruta del logo, por defecto `public/logo.png`. Si el archivo no existe, se escribe el nombre corto. Conviene un PNG cuadrado con fondo transparente, de unos 512x512. |
+| `logo` | Ruta del logo, por defecto `public/logo.png`. Si el archivo no existe, se usa el emblema de la escuela redibujado en vector (`public/shared/emblema.svg`, el mismo del Bowling Tótem). Conviene un PNG cuadrado con fondo transparente, de unos 512x512. |
 | `puerto` | Por defecto, 3000. |
 | `rotarPantalla` | 0, 90 o -90 (ver punto 3). |
 | `margenSeguridad` | Porcentaje de borde negro (por defecto, 4). |

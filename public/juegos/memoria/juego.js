@@ -109,7 +109,7 @@
       banner = { texto: repetir ? `Otra vez: nivel ${nivel}` : `¡Nivel ${nivel}!`, t: 0, dur: T_ANUNCIO, color: P.naranja };
       if (nivel === 5 && !repetir) banner.sub = 'Ahora más rápido';
       if (nivel === 8 && !repetir) banner.sub = 'Ojo: los botones cambian de lugar';
-      if (nivel === 10 && !repetir) banner.sub = '¡Seis colores!';
+      if (nivel === 10 && !repetir) banner.sub = 'Ahora son seis colores';
       if (nivel === 13 && !repetir) banner.sub = 'Velocidad máxima';
       cambiarFase('anuncio');
       cx.sonido.tono(523, 0.12, { tipo: 'square', volumen: 0.12 });
@@ -153,7 +153,7 @@
         : alcanzado;
       if (mejor > Math.floor(record.puntaje / 100)) {
         recordFestejado = true;
-        festejar('¡Nuevo récord!');
+        festejar('Nuevo récord');
       }
     }
 
@@ -264,20 +264,20 @@
     }
 
     function dibujarMarcador(ctx) {
-      D.texto(ctx, 'NIVEL', 60, 200, { tam: 26, color: P.gris, peso: 700 });
+      D.texto(ctx, 'NIVEL', 60, 200, { tam: 26, color: P.celeste, peso: 700, ls: 3 });
       D.texto(ctx, nivel, 60, 300, { tam: 110, peso: 800 });
-      D.texto(ctx, 'RÉCORD', 1020, 200, { tam: 26, color: P.gris, peso: 700, alinear: 'right' });
+      D.texto(ctx, 'RÉCORD DE LA ESCUELA', 1020, 200, { tam: 26, color: P.celeste, peso: 700, alinear: 'right', ls: 3 });
       const rec = record ? `Nivel ${Math.floor(record.puntaje / 100)}` : '—';
       D.texto(ctx, rec, 1020, 266, { tam: 56, peso: 800, alinear: 'right', color: recordFestejado ? P.naranja : P.blanco });
       if (record) D.texto(ctx, record.nombre.length > 22 ? record.nombre.slice(0, 21) + '…' : record.nombre, 1020, 304, { tam: 26, color: P.gris, alinear: 'right', fuente: 'texto', peso: 600 });
       if (modo === 'cooperativo') {
-        D.texto(ctx, 'VIDAS', 540, 200, { tam: 26, color: P.gris, alinear: 'center' });
+        D.texto(ctx, 'VIDAS', 540, 200, { tam: 26, color: P.celeste, alinear: 'center', ls: 3 });
         for (let i = 0; i < L.VIDAS_COOP; i++) {
           ctx.fillStyle = i < vidas ? P.rojo : P.panel2;
           corazon(ctx, 540 + (i - 1) * 70, 262, 26);
         }
       } else if (info.especial && fase !== 'fin') {
-        D.texto(ctx, info.especial === 'alreves' ? 'AL REVÉS' : 'TRAMPA', 540, 270, { tam: 52, color: P.naranja, alinear: 'center', peso: 800 });
+        D.texto(ctx, info.especial === 'alreves' ? 'AL REVÉS' : 'TRAMPA', 540, 270, { tam: 52, color: P.naranja, alinear: 'center', peso: 800, ls: 4 });
       }
     }
 
@@ -300,14 +300,14 @@
         const brillo = Math.max(luz, parpadea ? 1 : 0);
         if (brillo > 0) {
           ctx.globalAlpha = 0.35 * brillo;
-          D.rect(ctx, r.x - 18, r.y - 18, r.w + 36, r.h + 36, 34, D.tono(col.color, 0.3));
+          D.rect(ctx, r.x - 18, r.y - 18, r.w + 36, r.h + 36, 22, D.tono(col.color, 0.3));
           ctx.globalAlpha = 1;
         }
         const base = apagar ? D.tono(col.color, -0.7) : D.tono(col.color, -0.38);
-        D.rect(ctx, r.x, r.y, r.w, r.h, 24, brillo > 0 ? D.tono(col.color, 0.12 + 0.18 * brillo) : base);
+        D.rect(ctx, r.x, r.y, r.w, r.h, 12, brillo > 0 ? D.tono(col.color, 0.12 + 0.18 * brillo) : base);
         if (brillo > 0) {
           ctx.lineWidth = 8; ctx.strokeStyle = '#ffffff';
-          ctx.beginPath(); ctx.roundRect(r.x + 4, r.y + 4, r.w - 8, r.h - 8, 20); ctx.stroke();
+          ctx.beginPath(); ctx.roundRect(r.x + 4, r.y + 4, r.w - 8, r.h - 8, 9); ctx.stroke();
         }
         ctx.globalAlpha = brillo > 0 ? 1 : (apagar ? 0.25 : 0.7);
         cx.formas.dibujar(ctx, col.simbolo, r.x + r.w / 2, r.y + r.h / 2 - (col.etiqueta ? 18 : 0), r.w * 0.2, '#ffffff');
@@ -315,11 +315,11 @@
         ctx.globalAlpha = 1;
         if (modo === 'solo') {
           const pos = posiciones.indexOf(c);
-          D.rect(ctx, r.x + 16, r.y + 16, 62, 62, 8, 'rgba(0,0,0,0.35)');
+          D.rect(ctx, r.x + 16, r.y + 16, 62, 62, 4, 'rgba(0,0,0,0.35)');
           D.texto(ctx, pos + 1, r.x + 47, r.y + 62, { tam: 46, alinear: 'center', peso: 800 });
           if (cursor === pos && fase === 'respondiendo') {
             ctx.lineWidth = 10; ctx.strokeStyle = P.naranja;
-            ctx.beginPath(); ctx.roundRect(r.x - 14, r.y - 14, r.w + 28, r.h + 28, 32); ctx.stroke();
+            ctx.beginPath(); ctx.roundRect(r.x - 14, r.y - 14, r.w + 28, r.h + 28, 18); ctx.stroke();
           }
         }
       }
@@ -331,7 +331,7 @@
         const e = 10 + k * 80;
         ctx.globalAlpha = Math.max(0, 0.7 * (1 - k));
         ctx.lineWidth = 12 * (1 - k) + 2; ctx.strokeStyle = D.tono(colores[o.color].color, 0.4);
-        ctx.beginPath(); ctx.roundRect(r.x - e, r.y - e, r.w + 2 * e, r.h + 2 * e, 24 + e); ctx.stroke();
+        ctx.beginPath(); ctx.roundRect(r.x - e, r.y - e, r.w + 2 * e, r.h + 2 * e, 12 + e); ctx.stroke();
       });
       ctx.globalAlpha = 1;
     }
@@ -343,7 +343,8 @@
       if (i >= secuencia.length || tf - i * paso > luz) return;
       const tinta = colores[secuencia[i]].color;
       const palabra = colores[palabras[i]].palabra;
-      D.rect(ctx, 70, 640, 940, 420, 16, 'rgba(11,29,48,0.92)');
+      D.rect(ctx, 70, 640, 940, 420, 4, 'rgba(11,29,48,0.94)');
+      ctx.fillStyle = P.naranja; ctx.fillRect(70, 640, 940, 6);
       const tam = palabra.length > 7 ? 150 : 190;
       D.texto(ctx, palabra, 540, 850 + tam * 0.35, { tam, alinear: 'center', peso: 800, color: tinta });
       D.texto(ctx, `${i + 1} de ${secuencia.length}`, 540, 1020, { tam: 32, alinear: 'center', color: P.gris });
@@ -353,14 +354,14 @@
       if (fase === 'intro') return modo === 'solo' ? 'Mirá la secuencia y repetila' : 'Mirá la secuencia en la tele y repetila en tu celu';
       if (fase === 'anuncio' || fase === 'aviso') return 'Atentos…';
       if (fase === 'mostrando') return info.especial === 'trampa' ? 'Memorizá el color de cada palabra' : 'Memorizá la secuencia';
-      if (fase === 'mezcla') return '¡Se mezclan los botones!';
+      if (fase === 'mezcla') return 'Se mezclan los botones';
       if (fase === 'respondiendo') {
         const extra = info.especial === 'alreves' ? ' al revés' : info.especial === 'trampa' ? ' (color de la letra)' : '';
         if (modo === 'solo') return `Repetí la secuencia${extra} · ${resp ? resp.indice : 0} de ${esperadoActual.length}`;
         if (modo === 'cooperativo') return `Repitan la secuencia${extra} entre todos`;
-        return `¡Repitan en el celu${extra}!`;
+        return `Repitan la secuencia en el celu${extra}`;
       }
-      if (fase === 'bien') return '¡Bien!';
+      if (fase === 'bien') return 'Bien, siguiente nivel';
       if (fase === 'error') return razonFin;
       return razonFin || 'Fin del juego';
     }
@@ -383,7 +384,7 @@
 
     function dibujarJugadores(ctx) {
       if (modo === 'solo') {
-        D.texto(ctx, 'CÓMO SE JUEGA', 60, 1590, { tam: 26, color: P.gris });
+        D.seccion(ctx, 'Cómo se juega', 60, 1594);
         D.texto(ctx, `Clic en el botón, o teclas 1 a ${posiciones.length}`, 60, 1660, { tam: 44, peso: 700, fuente: 'texto' });
         D.texto(ctx, 'Flechas para elegir y Enter para tocar', 60, 1720, { tam: 36, peso: 600, fuente: 'texto', color: P.gris });
         D.texto(ctx, '3 segundos por color · termina al primer error', 60, 1780, { tam: 36, peso: 600, fuente: 'texto', color: P.gris });
@@ -397,15 +398,14 @@
         const e = est[j.id];
         const fuera = e.estado === 'afuera';
         ctx.globalAlpha = fuera ? 0.45 : 1;
-        D.rect(ctx, x, y, w, 140, 8, P.panel2);
-        ctx.fillStyle = j.color; ctx.beginPath(); ctx.arc(x + 36, y + 46, 16, 0, Math.PI * 2); ctx.fill();
-        D.texto(ctx, j.nombre, x + 64, y + 60, { tam: 40, peso: 700, fuente: 'texto' });
+        D.ficha(ctx, x, y, w, 140, j.color, P.panel2);
+        D.texto(ctx, j.nombre, x + 30, y + 58, { tam: 40, peso: 700, fuente: 'texto', max: w - 50 });
         let st = ESTADO_TXT[e.estado] || '';
         if (modo === 'eliminacion' && e.estado === 'respondiendo' && e.resp) st = `respondiendo ${e.resp.indice}/${esperadoActual.length}`;
         if (modo === 'cooperativo') st = cx.jugadorConectado(j.id) ? '' : 'desconectado';
         if (!cx.jugadorConectado(j.id) && !fuera && modo === 'eliminacion') st += ' · sin conexión';
         const colorSt = e.estado === 'listo' ? P.verde : fuera ? P.rojo : P.gris;
-        D.texto(ctx, st, x + 28, y + 114, { tam: 32, peso: 700, color: colorSt });
+        D.texto(ctx, st.toUpperCase(), x + 30, y + 112, { tam: 26, peso: 700, color: colorSt, ls: 2 });
         if (modo === 'cooperativo') {
           let k = 0;
           Object.keys(duenos).forEach((c) => {
@@ -426,8 +426,8 @@
         const alreves = info.especial === 'alreves';
         D.rect(ctx, 0, 700, 1080, 480, 0, 'rgba(11,29,48,0.94)');
         ctx.fillStyle = P.naranja; ctx.fillRect(0, 700, 1080, 10); ctx.fillRect(0, 1170, 1080, 10);
-        D.texto(ctx, 'RONDA ESPECIAL', 540, 800, { tam: 40, alinear: 'center', color: P.gris });
-        D.texto(ctx, alreves ? '¡Al revés!' : '¡Trampa!', 540, 950, { tam: 150, alinear: 'center', peso: 800, color: P.naranja });
+        D.texto(ctx, 'RONDA ESPECIAL', 540, 800, { tam: 40, alinear: 'center', color: P.celeste, ls: 6 });
+        D.texto(ctx, alreves ? 'Al revés' : 'Trampa', 540, 950, { tam: 150, alinear: 'center', peso: 800, color: P.naranja });
         D.texto(ctx, alreves ? 'Repetila de atrás para adelante' : 'Tocá el color de la LETRA, no lo que dice', 540, 1040, { tam: 44, alinear: 'center', fuente: 'texto', peso: 700 });
         D.rect(ctx, 290, 1090, 500 * (1 - tf / T_AVISO), 14, 7, P.naranja);
         return;
@@ -598,14 +598,14 @@
         dibujarConfeti(ctx);
         if (fase === 'fin') {
           D.rect(ctx, 0, 820, 1080, 260, 0, 'rgba(11,29,48,0.9)');
-          D.texto(ctx, ganador ? `¡Ganó ${ganador.nombre}!` : 'Fin del juego', 540, 990, { tam: 120, alinear: 'center', peso: 800, color: P.naranja });
+          D.texto(ctx, ganador ? `Ganó ${ganador.nombre}` : 'Fin del juego', 540, 990, { tam: 120, alinear: 'center', peso: 800, color: P.naranja });
         }
       },
 
       controlCelular(id) {
         const e = est[id];
         if (!e) return { tipo: 'espera', grande: 'Mirá la tele' };
-        const especial = info.especial === 'alreves' ? '¡Al revés!' : info.especial === 'trampa' ? 'Tocá el color de la LETRA' : '';
+        const especial = info.especial === 'alreves' ? 'Al revés: de atrás para adelante' : info.especial === 'trampa' ? 'Tocá el color de la LETRA' : '';
         if (fase === 'fin') return { tipo: 'espera', id: 'fin', titulo: 'Terminó', grande: 'Mirá la tele' };
         if (modo === 'eliminacion' && e.estado === 'afuera') {
           return { tipo: 'espera', id: 'afuera', titulo: '✗ Quedaste afuera', mensaje: `Llegaste al nivel ${e.nivel}`, grande: 'Mirá cómo sigue' };
@@ -614,10 +614,10 @@
           return { tipo: 'espera', id: `ver-${nivel}-${rondaN}`, titulo: `Nivel ${nivel}`, mensaje: especial || 'El celu no muestra la secuencia', grande: 'Mirá la tele y memorizá' };
         }
         if (modo === 'eliminacion') {
-          if (e.estado === 'listo') return { tipo: 'espera', id: `listo-${nivel}`, titulo: '✓ ¡Bien!', mensaje: 'Esperá a los demás', grande: 'Listo' };
+          if (e.estado === 'listo') return { tipo: 'espera', id: `listo-${nivel}`, titulo: '✓ Listo', mensaje: 'Esperá a los demás', grande: 'Bien' };
           if (e.estado !== 'respondiendo') return { tipo: 'espera', id: 'mirando', grande: 'Mirá la tele' };
           return {
-            tipo: 'botones', id: `resp-${nivel}-${rondaN}`, titulo: especial || '¡Repetila!', mensaje: `Nivel ${nivel} · ${esperadoActual.length} colores`,
+            tipo: 'botones', id: `resp-${nivel}-${rondaN}`, titulo: especial || 'Repetí la secuencia', mensaje: `Nivel ${nivel} · ${esperadoActual.length} colores`,
             columnas: 2, botones: posiciones.map((c) => ({ id: c, color: colores[c].color, simbolo: colores[c].simbolo, texto: colores[c].etiqueta })),
           };
         }
@@ -660,10 +660,10 @@
         const celular = {};
         orden.forEach((j, i) => {
           const e = est[j.id];
-          celular[j.id] = { titulo: j === ganador ? '¡Ganaste!' : `Puesto ${i + 1}`, mensaje: `Llegaste al nivel ${e.nivel}` };
+          celular[j.id] = { titulo: j === ganador ? 'Ganaste' : `Puesto ${i + 1}`, mensaje: `Llegaste al nivel ${e.nivel}` };
         });
         return {
-          titulo: ganador ? `¡Ganó ${ganador.nombre}!` : '¡Empate!',
+          titulo: ganador ? `Ganó ${ganador.nombre}` : 'Empate',
           subtitulo: razonFin,
           filas: orden.map((j, i) => {
             const e = est[j.id];

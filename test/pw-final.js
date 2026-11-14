@@ -285,7 +285,7 @@ async function contarRanking(base) {
     u.revisar(true, 'la tele y los 3 celus se reconectaron solos al servidor nuevo');
     await tele.reload();
     await tele.waitForFunction(() => document.body.dataset.listo === '1');
-    await tele.waitForFunction(() => document.querySelectorAll('#record li .val').length > 0);
+    await tele.waitForFunction(() => document.querySelectorAll('#ranking-cuerpo li .val').length > 0);
     await u.captura(tele, 'f6-menu-despues-de-reiniciar');
 
     // ------------------------------------------------------------------ 4. pantalla girada desde config

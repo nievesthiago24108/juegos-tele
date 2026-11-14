@@ -170,10 +170,11 @@
   let records = {};
   async function cargarRecords() {
     try {
-      const r = await fetch('/api/ranking?n=5').then((x) => x.json());
+      const r = await fetch('/api/ranking?n=10').then((x) => x.json());
       records = {};
       (r.juegos || []).forEach((j) => { records[j.id] = j; });
-      if (estado.fase === 'menu') dibujarRecord();
+      rankingClave = '';
+      if (estado.fase === 'menu') dibujarRanking();
     } catch { /* sin ranking no pasa nada */ }
   }
 
@@ -181,6 +182,7 @@
     if (!modo.celulares) return 0;
     return Math.max(0, modo.min - conectados().length);
   }
+  const rangoModo = (m) => (m.celulares ? (m.min === m.max ? `${m.min} celulares` : `${m.min} a ${m.max} celulares`) : 'mouse y teclado');
 
   function dibujarMenu() {
     const ul = $('lista-juegos');
@@ -188,53 +190,78 @@
       const activo = ji === estado.sel.juego;
       const modos = j.modos.map((m, mi) => {
         const f = faltan(m);
-        const rango = m.celulares ? (m.min === m.max ? `${m.min} celus` : `${m.min}–${m.max} celus`) : 'mouse y teclado';
         const cls = ['modo', activo && mi === estado.sel.modo ? 'activo' : '', f ? 'falta' : ''].join(' ');
-        return `<button class="${cls}" data-j="${ji}" data-m="${mi}">${esc(m.nombre)}<small>${esc(f ? `faltan ${f}` : rango)}</small></button>`;
+        return `<button class="${cls}" data-j="${ji}" data-m="${mi}">${esc(m.nombre)}<small>${esc(f ? `faltan ${f}` : rangoModo(m))}</small></button>`;
       }).join('');
       return `<li class="juego ${activo ? 'activo' : ''}" data-j="${ji}"><h3>${esc(j.nombre)}</h3><p>${esc(j.descripcion)}</p><div class="modos">${modos}</div></li>`;
     }).join('');
     dibujarJugadores();
-    dibujarRecord();
+    rankingClave = '';
+    dibujarRanking();
   }
 
   function dibujarJugadores() {
     const lista = estado.sala.jugadores || [];
-    $('cant-jugadores').textContent = lista.length ? `(${lista.length}/${estado.sala.maxJugadores || 6})` : '';
-    $('jugadores').innerHTML = lista.length ? lista.map((j) =>
-      `<li class="${j.conectado ? '' : 'fuera'}"><span class="punto" style="background:${esc(j.color)}"></span>${esc(j.nombre)}${j.anfitrion ? ' <small>anfitrión</small>' : ''}</li>`).join('')
-      : '<li class="vacio">Todavía no entró nadie. Para jugar solo no hace falta celular.</li>';
+    $('cant-jugadores').textContent = lista.length ? `${lista.length}/${estado.sala.maxJugadores || 6}` : '';
+    $('jugadores').innerHTML = lista.length ? lista.map((j) => {
+      const tag = j.anfitrion ? 'Anfitrión' : j.conectado ? '' : 'Sin conexión';
+      return `<li class="${j.conectado ? '' : 'fuera'}" style="--color:${esc(j.color)}"><span class="nom">${esc(j.nombre)}</span>${tag ? `<span class="tag">${tag}</span>` : ''}</li>`;
+    }).join('') : '<li class="vacio">Todavía no hay nadie. Para jugar solo no hace falta celular.</li>';
     // los modos que dependen de la cantidad de celus
     document.querySelectorAll('.modo').forEach((b) => {
       const m = estado.juegos[+b.dataset.j].modos[+b.dataset.m];
       const f = faltan(m);
       b.classList.toggle('falta', !!f);
-      const rango = m.celulares ? (m.min === m.max ? `${m.min} celus` : `${m.min}–${m.max} celus`) : 'mouse y teclado';
-      b.querySelector('small').textContent = f ? `faltan ${f}` : rango;
+      b.querySelector('small').textContent = f ? `faltan ${f}` : rangoModo(m);
     });
+    const hay = lista.some((j) => j.conectado);
+    const anf = lista.find((j) => j.anfitrion && j.conectado);
+    $('indicacion').textContent = !hay ? 'Elegí con las flechas y Enter, o escaneá el QR con el celu'
+      : anf ? `${anf.nombre} es anfitrión: puede elegir el juego desde su celu` : 'Elegí un juego con las flechas y Enter';
   }
 
-  function dibujarRecord() {
+  // Ranking del juego elegido: top 10 en dos columnas, rotando Hoy → Semana → Siempre (y la
+  // tabla siguiente del juego, si tiene varias), igual que el lobby del bowling
+  const TABLAS = [['hoy', 'Hoy'], ['semana', 'Semana'], ['siempre', 'Siempre']];
+  const ROTACION_MS = 8000;
+  let rankingClave = '';
+  function dibujarRanking() {
     const j = estado.juegos[estado.sel.juego];
     if (!j) return;
-    $('record-juego').textContent = j.nombre;
     const r = records[j.id];
-    const filas = [];
-    if (r) {
-      r.rankings.forEach((rk) => {
-        rk.hoy.slice(0, rk === r.rankings[0] ? 3 : 1).forEach((x) => filas.push({ x, rk }));
-      });
+    const cats = r && r.rankings.length ? r.rankings : (j.rankings || []);
+    const ahora = performance.now();
+    const k = Math.floor(ahora / ROTACION_MS);
+    const ti = k % TABLAS.length;
+    const rk = cats[Math.floor(k / TABLAS.length) % Math.max(1, cats.length)];
+    const clave = `${j.id}|${rk && rk.id}|${ti}`;
+    // la barra naranja avanza hasta la próxima tabla
+    const avance = $('pestanas').querySelector('.avance');
+    if (avance) avance.style.width = `calc(${Math.min(100, ((ahora % ROTACION_MS) / ROTACION_MS) * 100 + 2)}% + 20px)`;
+    if (clave === rankingClave) return;
+    rankingClave = clave;
+    $('ranking-cat').textContent = rk ? `${rk.titulo} · ${j.nombre}` : j.nombre;
+    $('pestanas').innerHTML = TABLAS.map(([, t], i) => `<span class="pestana ${i === ti ? 'activa' : ''}">${t}${i === ti ? '<span class="avance"></span>' : ''}</span>`).join('');
+    const lista = rk && rk[TABLAS[ti][0]] ? rk[TABLAS[ti][0]] : [];
+    if (!lista.length) {
+      const vacio = ti === 0 ? 'Todavía no hay puntajes hoy. El primero queda arriba.' : 'Todavía no hay puntajes.';
+      $('ranking-cuerpo').innerHTML = `<div class="ranking-vacio">${vacio}</div>`;
+      return;
     }
-    filas.sort((a, b) => (a.rk === b.rk ? a.x.puesto - b.x.puesto : 0));
-    $('record').innerHTML = filas.length ? filas.slice(0, 4).map(({ x, rk }) =>
-      `<li><span class="pos">${x.puesto}</span><span>${esc(x.nombre)}<span class="cat">${esc(rk.titulo)}</span></span><span class="val">${esc(formatear(rk, x))}</span></li>`).join('')
-      : '<li><span class="vacio">Nadie jugó todavía hoy. ¡Estrenalo!</span></li>';
+    const fila = (x) => `<li class="p${x.puesto}"><span class="medalla m${x.puesto}">${x.puesto}</span><span class="nom">${esc(x.nombre)}</span><span class="val">${esc(formatearCorto(rk, x))}</span></li>`;
+    $('ranking-cuerpo').innerHTML = `<ol>${lista.slice(0, 5).map(fila).join('')}</ol><ol>${lista.slice(5, 10).map(fila).join('')}</ol>`;
   }
+  setInterval(() => { if (estado.fase === 'menu') dibujarRanking(); }, 200);
 
   function formatear(rk, x) {
     if (rk.formato === 'nivel') return `Nivel ${Math.floor(x.puntaje / 100)}`;
     if (rk.formato === 'porcentaje') return `${x.puntaje}%`;
     return `${x.puntaje} ${rk.unidad}`;
+  }
+  function formatearCorto(rk, x) {
+    if (rk.formato === 'nivel') return `Nivel ${Math.floor(x.puntaje / 100)}`;
+    if (rk.formato === 'porcentaje') return `${x.puntaje}%`;
+    return String(x.puntaje);
   }
   window.Plataforma.formatear = formatear;
 
@@ -393,43 +420,63 @@
     }
   }
 
+  // "¡Ganó Ana!" → "Ganó Ana": en la interfaz no van signos de exclamación (sí en los carteles del juego)
+  const sinExclamar = (t) => String(t || '').replace(/^¡\s*/, '').replace(/\s*!$/, '');
+  const ordinal = (n) => `${n}.º`;
+
   function guardar(registros, res) {
     const a = estado.actual;
     if (!registros.length) return;
-    $('res-guardado').textContent = 'Guardando…';
+    $('res-guardado').textContent = 'Guardando en el ranking…';
     socket.timeout(5000).emit('tele:puntajes', {
       partidaId: a.partidaId, juego: a.manifiesto.id, modo: a.modo.id, registros,
     }, (err, r) => {
       if (err || !r || !r.ok) {
-        $('res-guardado').textContent = 'No se pudo guardar el puntaje' + (r && r.error ? `: ${r.error}` : '.');
+        $('res-guardado').textContent = 'No se pudo guardar el puntaje' + (r && r.error ? `: ${r.error}` : '.') + ' Revisá que el servidor siga andando.';
         return;
       }
-      const rec = (r.guardados || []).find((g) => g.esRecord);
-      const mejor = (r.guardados || []).slice().sort((x, y) => x.puestoHoy - y.puestoHoy)[0];
-      let texto = 'Puntajes guardados en el ranking.';
+      const guardados = r.guardados || [];
+      const rec = guardados.find((g) => g.esRecord);
       if (rec) {
         const rk = a.manifiesto.rankings.find((x) => x.id === rec.registro.categoria);
-        texto = `¡Nuevo récord! ${rec.registro.nombre} · ${rk ? rk.titulo : ''}`;
+        const cinta = $('res-cinta');
+        cinta.textContent = `Nuevo récord de la escuela · ${rec.registro.nombre}`;
+        cinta.title = rk ? rk.titulo : '';
+        cinta.classList.remove('oculto');
         Sonido.festejo();
         llamar('festejarRecord', rec);
-      } else if (mejor) {
-        texto = `${mejor.registro.nombre}: puesto ${mejor.puestoHoy} de hoy`;
       }
-      $('res-guardado').textContent = texto;
-      res.guardados = r.guardados;
+      $('res-guardado').textContent = guardados.length ? 'Guardado en el ranking.' : '';
+      res.guardados = guardados;
+      dibujarFilas(res);
       cargarRecords();
     });
   }
 
+  function dibujarFilas(res) {
+    const guardados = res.guardados || [];
+    const puestoDe = (f) => {
+      const g = guardados.find((x) => x.registro.nombre === f.nombre);
+      if (!g) return '';
+      if (g.esRecord) return 'Récord de la escuela';
+      return g.puestoHoy <= 10 ? `${ordinal(g.puestoHoy)} de hoy` : '';
+    };
+    $('res-filas').innerHTML = (res.filas || []).slice(0, 6).map((f, i) => {
+      const pos = f.pos != null ? f.pos : i + 1;
+      return `<li class="${f.destacado ? 'destacado' : ''}" style="--color:${esc(f.color || 'var(--azul)')}">` +
+        `<span class="medalla m${pos}">${esc(pos)}</span>` +
+        `<span class="nom">${esc(f.nombre)}${f.detalle ? `<small>${esc(f.detalle)}</small>` : ''}</span>` +
+        `<span class="der"><div class="val">${esc(f.valor)}</div><div class="puesto">${esc(puestoDe(f))}</div></span></li>`;
+    }).join('');
+  }
+
   function mostrarResultados(res) {
     const a = estado.actual;
-    $('res-juego').textContent = `${a.manifiesto.nombre} · ${a.modo.nombre}`;
-    $('res-titulo').textContent = res.titulo;
+    $('res-juego').textContent = `${a.manifiesto.nombre}  ·  ${a.modo.nombre}`;
+    $('res-titulo').textContent = sinExclamar(res.titulo);
     $('res-subtitulo').textContent = res.subtitulo || '';
-    $('res-filas').innerHTML = (res.filas || []).slice(0, 8).map((f, i) =>
-      `<li class="${f.destacado ? 'destacado' : ''}"><span class="pos">${f.pos != null ? esc(f.pos) : i + 1}</span>` +
-      `<span class="nom">${f.color ? `<span class="punto" style="background:${esc(f.color)}"></span>` : ''}<span>${esc(f.nombre)}${f.detalle ? `<small>${esc(f.detalle)}</small>` : ''}</span></span>` +
-      `<span class="val">${esc(f.valor)}</span></li>`).join('');
+    $('res-cinta').classList.add('oculto');
+    dibujarFilas(res);
     $('res-guardado').textContent = '';
     mostrar('resultados');
     avisarFase();
@@ -455,14 +502,18 @@
     cargarRecords();
   }
 
-  // inactividad en resultados: a los 60 s vuelve solo al menú
-  let timerInactivo = 0;
+  // inactividad en resultados: a los 60 s vuelve solo al menú (con cuenta regresiva a la vista)
+  const INACTIVO_MS = 60000;
+  let vencimiento = 0;
   function reiniciarInactividad() {
-    clearTimeout(timerInactivo);
-    if (estado.fase === 'resultados' || estado.fase === 'nombre') {
-      timerInactivo = setTimeout(() => { if (estado.fase === 'resultados' || estado.fase === 'nombre') volverAlMenu(); }, 60000);
-    }
+    vencimiento = performance.now() + INACTIVO_MS;
   }
+  setInterval(() => {
+    if (estado.fase !== 'resultados' && estado.fase !== 'nombre') return;
+    const resta = Math.ceil((vencimiento - performance.now()) / 1000);
+    if (resta <= 0) { volverAlMenu(); return; }
+    $('res-vuelta').textContent = resta <= 30 ? `Volviendo al menú en ${resta} s` : '';
+  }, 500);
 
   function mostrar(fase) {
     estado.fase = fase;
@@ -497,7 +548,7 @@
     else if (nombre.length < 14 && !(c === ' ' && (!nombre || nombre.endsWith(' ')))) nombre += c;
     Sonido.clic();
     $('tec-nombre').textContent = nombre;
-    $('tec-ayuda').textContent = 'De 2 a 14 letras. Usá el mouse o el teclado.';
+    $('tec-ayuda').textContent = 'De 2 a 14 letras o números. Usá el mouse o el teclado.';
     $('tec-ayuda').classList.remove('error');
   }
   function pedirNombre(res, registros) {
@@ -505,9 +556,9 @@
     pendiente = { res, registros };
     nombre = '';
     $('tec-nombre').textContent = '';
-    $('tec-juego').textContent = `${a.manifiesto.nombre} · ${a.modo.nombre}`;
-    $('tec-titulo').textContent = res.titulo;
-    $('tec-ayuda').textContent = 'De 2 a 14 letras. Usá el mouse o el teclado.';
+    $('tec-juego').textContent = `${a.manifiesto.nombre}  ·  ${a.modo.nombre}`;
+    $('tec-titulo').textContent = sinExclamar(res.titulo);
+    $('tec-ayuda').textContent = 'De 2 a 14 letras o números. Usá el mouse o el teclado.';
     $('tec-ayuda').classList.remove('error');
     mostrar('nombre');
     avisarFase();
@@ -639,17 +690,18 @@
     document.documentElement.style.setProperty('--naranja', config.colores.acento);
     document.documentElement.style.setProperty('--noche', config.colores.fondo);
 
-    $('escuela').textContent = config.nombreEscuela;
-    $('creditos').textContent = config.creditos;
+    document.querySelectorAll('[data-escuela]').forEach((el) => { el.textContent = config.nombreEscuela; });
+    document.querySelectorAll('[data-creditos]').forEach((el) => { el.textContent = config.creditos; });
     $('qr').src = config.qr;
     $('url').textContent = config.url;
-    if (config.logo) {
-      logoImg = new Image();
-      logoImg.src = config.logo;
-      $('marca').innerHTML = `<img src="${esc(config.logo)}" alt="">`;
-    } else {
-      $('marca').innerHTML = `<div class="marca-texto">${esc(config.nombreCorto)}</div>`;
-    }
+    // logo de la escuela: public/logo.png si existe; si no, el emblema redibujado (lo resuelve el servidor)
+    logoImg = new Image();
+    logoImg.onerror = () => { if (!/emblema\.svg$/.test(logoImg.src)) logoImg.src = '/shared/emblema.svg'; };
+    logoImg.src = config.logo || '/shared/emblema.svg';
+    document.querySelectorAll('[data-logo]').forEach((el) => {
+      el.onerror = () => { if (!/emblema\.svg$/.test(el.src)) el.src = '/shared/emblema.svg'; };
+      el.src = logoImg.src;
+    });
 
     for (const j of juegos) {
       for (const f of j.archivos) await cargarScript(`/juegos/${j.id}/${f}`);

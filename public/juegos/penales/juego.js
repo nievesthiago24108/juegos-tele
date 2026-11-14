@@ -147,7 +147,7 @@
       const tx = TEXTOS[r];
       let sub = '';
       if (tiro.debil) sub = 'Se le acabó el tiempo: tiro débil al medio';
-      else if (r === 'gol' && res.golazo) sub = '¡Golazo imposible, pegado al palo!';
+      else if (r === 'gol' && res.golazo) sub = 'Golazo imposible, pegado al palo';
       else if (r === 'gol' && tiro.y > 0.75 && Math.abs(tiro.x) > 0.6) sub = 'Al ángulo';
       else if (r === 'afuera' && tiro.y > 1) sub = tiro.fuerza > 0.85 ? 'Demasiada fuerza: se fue por arriba' : 'Por arriba del travesaño';
       else if (r === 'afuera') sub = 'Se fue al costado';
@@ -428,11 +428,11 @@
     function dibujarMarcador(ctx) {
       D.rect(ctx, 0, 140, 1080, 150, 0, P.noche);
       if (modo === 'solo') {
-        D.texto(ctx, 'GOLES SEGUIDOS', 60, 186, { tam: 26, color: P.gris });
+        D.texto(ctx, 'GOLES SEGUIDOS', 60, 186, { tam: 26, color: P.celeste, ls: 3 });
         D.texto(ctx, solo.racha, 60, 272, { tam: 88, peso: 800, color: solo.racha ? P.naranja : P.blanco });
-        D.texto(ctx, 'MEJOR', 470, 186, { tam: 26, color: P.gris, alinear: 'center' });
+        D.texto(ctx, 'MEJOR RACHA', 470, 186, { tam: 26, color: P.celeste, alinear: 'center', ls: 3 });
         D.texto(ctx, solo.mejor, 470, 272, { tam: 88, peso: 800, alinear: 'center' });
-        D.texto(ctx, 'ERRADOS', 1020, 186, { tam: 26, color: P.gris, alinear: 'right' });
+        D.texto(ctx, 'ERRADOS', 1020, 186, { tam: 26, color: P.celeste, alinear: 'right', ls: 3 });
         for (let i = 0; i < 3; i++) {
           const x = 1020 - 30 - (2 - i) * 74, y = 240;
           if (i < solo.errados) { ctx.fillStyle = P.rojo; ctx.beginPath(); ctx.arc(x, y, 30, 0, Math.PI * 2); ctx.fill(); D.texto(ctx, '✗', x, y + 13, { tam: 38, alinear: 'center', color: P.noche, fuente: 'texto', peso: 800 }); }
@@ -450,7 +450,7 @@
           puntitos(ctx, 420, y - 3, tanda[i], 5, 20);
           D.texto(ctx, tanda[i].filter(Boolean).length, 1010, y + 14, { tam: 56, peso: 800, alinear: 'right', color: patea ? P.naranja : P.blanco });
         });
-        if (tandaInfo.muerteSubita && !tandaInfo.terminado) D.texto(ctx, 'MUERTE SÚBITA', 540, 160, { tam: 22, alinear: 'center', color: P.naranja });
+        if (tandaInfo.muerteSubita && !tandaInfo.terminado) D.texto(ctx, 'MUERTE SÚBITA', 540, 162, { tam: 22, alinear: 'center', color: P.naranja, ls: 3 });
         return;
       }
       // torneo: 2 columnas × 3 filas
@@ -483,7 +483,7 @@
         D.texto(ctx, resta, 1020, 1880, { tam: 70, peso: 800, alinear: 'right', color: resta <= 5 ? P.rojo : P.gris });
       } else if (fase === 'carrera') {
         linea1 = pateador ? `${pateador.nombre} toma carrera…` : 'Tomando carrera…';
-        linea2 = esUno() ? `${arquero.nombre}: ${zonaElegida == null ? '¡elegí rápido!' : 'ya eligió ✓'}` : '';
+        linea2 = esUno() ? `${arquero.nombre}: ${zonaElegida == null ? 'elegí rápido' : 'ya eligió ✓'}` : '';
       } else if (fase === 'preparar') {
         linea1 = modo === 'solo' ? `Tiro ${n}` : `Patea ${pateador.nombre}`;
         linea2 = esUno() ? `Ataja ${arquero.nombre}` : esTorneo() ? `Tiro ${Math.ceil(n / jugadores.length)} de 5` : '';
@@ -704,7 +704,7 @@
         dibujarInfo(ctx);
         if (fase === 'fin') {
           D.rect(ctx, 0, 1040, 1080, 220, 0, 'rgba(11,29,48,0.9)');
-          D.texto(ctx, '¡Final!', 540, 1190, { tam: 130, alinear: 'center', peso: 800, color: P.naranja });
+          D.texto(ctx, 'Terminó la tanda', 540, 1190, { tam: 120, alinear: 'center', peso: 800, color: P.naranja });
         }
       },
 
@@ -716,16 +716,16 @@
         const esPateador = pateador && pateador.id === id;
         const esArquero = arquero && arquero.id === id;
         if (esPateador) {
-          if (fase === 'preparar') return { tipo: 'espera', id: `prep-${n}`, titulo: '¡Te toca patear!', grande: 'Preparate', mensaje: arquero ? `Ataja ${arquero.nombre}` : 'Contra el arquero de la compu' };
-          if (fase === 'apuntar') return { tipo: 'deslizar', id: `tiro-${n}-${intento}`, titulo: '¡Pateá!', mensaje: aviso || 'Deslizá desde la pelota hacia el arco. Rápido = fuerte' };
-          if (fase === 'carrera' || fase === 'vuelo') return { tipo: 'espera', id: `pateo-${n}`, titulo: '¡Pateaste!', grande: 'Mirá la tele' };
+          if (fase === 'preparar') return { tipo: 'espera', id: `prep-${n}`, titulo: 'Te toca patear', grande: 'Preparate', mensaje: arquero ? `Ataja ${arquero.nombre}` : 'Contra el arquero de la compu' };
+          if (fase === 'apuntar') return { tipo: 'deslizar', id: `tiro-${n}-${intento}`, titulo: 'Te toca patear', mensaje: aviso || 'Deslizá desde la pelota hacia el arco. Rápido = fuerte' };
+          if (fase === 'carrera' || fase === 'vuelo') return { tipo: 'espera', id: `pateo-${n}`, titulo: 'Pateaste', grande: 'Mirá la tele' };
           return { tipo: 'espera', id: `res-${n}`, titulo: res ? TEXTOS[res.resultado].t : '', grande: 'Mirá la tele' };
         }
         if (esArquero) {
           if (fase === 'preparar' || fase === 'apuntar' || fase === 'carrera') {
             return {
               tipo: 'zonas', id: `arq-${n}`, columnas: 3, filas: 2, arco: true, etiquetas: ['↖', '↑', '↗', '↙', '↓', '↘'],
-              titulo: '¡Atajá!', mensaje: `Patea ${pateador.nombre}. Elegí dónde tirarte (es secreto). Si no elegís, te quedás en el medio.`,
+              titulo: 'Te toca atajar', mensaje: `Patea ${pateador.nombre}. Elegí dónde tirarte (es secreto). Si no elegís, te quedás en el medio.`,
             };
           }
           return { tipo: 'espera', id: `arq-res-${n}`, titulo: res ? TEXTOS[res.resultado].t : '', grande: 'Mirá la tele' };
@@ -751,14 +751,14 @@
           const celular = {};
           jugadores.forEach((j, i) => {
             const a = arq[j.id];
-            celular[j.id] = { titulo: ganador === j ? '¡Ganaste!' : 'Perdiste', mensaje: `${g[i]} goles · atajaste ${a.atajadas} de ${a.recibidos}` };
+            celular[j.id] = { titulo: ganador === j ? 'Ganaste' : 'Perdiste', mensaje: `${g[i]} goles · atajaste ${a.atajadas} de ${a.recibidos}` };
           });
           const registros = jugadores.filter((j) => arq[j.id].recibidos >= 5).map((j) => ({
             categoria: 'arquero', puntaje: Math.round(100 * arq[j.id].atajadas / arq[j.id].recibidos), jugadorIds: [j.id],
             detalle: { atajadas: arq[j.id].atajadas, recibidos: arq[j.id].recibidos, texto: `atajó ${arq[j.id].atajadas} de ${arq[j.id].recibidos}` },
           }));
           return {
-            titulo: ganador ? `¡Ganó ${ganador.nombre}!` : 'Empate',
+            titulo: ganador ? `Ganó ${ganador.nombre}` : 'Empate',
             subtitulo: `${g[0]} a ${g[1]}${tandaInfo.muerteSubita ? ' en muerte súbita' : ''}`,
             filas: jugadores.map((j, i) => ({
               nombre: j.nombre, color: j.color, valor: `${g[i]} goles`, destacado: ganador === j,
@@ -773,9 +773,9 @@
         const ganador = orden[0];
         const empate = orden.length > 1 && tor[orden[1].id].goles === tor[ganador.id].goles;
         const celular = {};
-        orden.forEach((j, i) => { celular[j.id] = { titulo: i === 0 ? '¡Ganaste el torneo!' : `Puesto ${i + 1}`, mensaje: `${tor[j.id].goles} goles de 5 · precisión ${precisionPct(j)}%` }; });
+        orden.forEach((j, i) => { celular[j.id] = { titulo: i === 0 ? 'Ganaste el torneo' : `Puesto ${i + 1}`, mensaje: `${tor[j.id].goles} goles de 5 · precisión ${precisionPct(j)}%` }; });
         return {
-          titulo: `¡Ganó ${ganador.nombre}!`,
+          titulo: `Ganó ${ganador.nombre}`,
           subtitulo: `${tor[ganador.id].goles} goles de 5${empate ? ` · desempate por precisión (${precisionPct(ganador)}%)` : ''}`,
           filas: orden.map((j, i) => ({ nombre: j.nombre, color: j.color, valor: `${tor[j.id].goles} goles`, detalle: `Precisión ${precisionPct(j)}%`, destacado: i === 0 })),
           registros: [{ categoria: 'torneo', puntaje: tor[ganador.id].goles, jugadorIds: [ganador.id], detalle: { precision: precisionPct(ganador), rivales: jugadores.length - 1, texto: `ganó contra ${jugadores.length - 1}` } }],

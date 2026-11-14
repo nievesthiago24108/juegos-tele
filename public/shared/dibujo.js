@@ -2,7 +2,8 @@
  * Ayudas de dibujo para los juegos (canvas 2D). Mismo estilo "Institucional Nº4" que el resto.
  *   Dibujo.PAL, Dibujo.texto(ctx, 'Hola', x, y, { tam, color, alinear, peso, fuente, base })
  *   Dibujo.capa(clave, ancho, alto, dibujar) → canvas en caché (se redibuja solo si cambia la clave)
- *   Dibujo.encabezado(ctx, contexto, titulo, derecha)  → franja de arriba con escuela y título
+ *   Dibujo.encabezado(ctx, contexto, titulo, derecha)  → franja de arriba con título, modo y emblema
+ *   Dibujo.seccion(ctx, 'Jugadores', x, y), Dibujo.ficha(ctx, x, y, w, h, color)  → como en el bowling
  * Regla de rendimiento (aprendida en el bowling): nada de shadowBlur, y lo que no cambia va a una capa.
  */
 (function () {
@@ -14,14 +15,18 @@
   const FUENTE = '"Barlow", "Segoe UI", Arial, sans-serif';
   const TITULO = '"Barlow Condensed", "Arial Narrow", "Segoe UI", sans-serif';
 
+  /** o: { tam, color, alinear, peso, fuente: 'texto' | (condensada), base, borde, colorBorde, ls (espaciado), max (ancho máx.) } */
   function texto(ctx, str, x, y, o) {
     o = o || {};
     ctx.font = `${o.peso || 700} ${o.tam || 32}px ${o.fuente === 'texto' ? FUENTE : TITULO}`;
     ctx.fillStyle = o.color || PAL.blanco;
     ctx.textAlign = o.alinear || 'left';
     ctx.textBaseline = o.base || 'alphabetic';
-    if (o.borde) { ctx.lineWidth = o.borde; ctx.strokeStyle = o.colorBorde || PAL.noche; ctx.lineJoin = 'round'; ctx.strokeText(String(str), x, y); }
-    ctx.fillText(String(str), x, y);
+    if ('letterSpacing' in ctx) ctx.letterSpacing = (o.ls || 0) + 'px';
+    const t = String(str);
+    if (o.borde) { ctx.lineWidth = o.borde; ctx.strokeStyle = o.colorBorde || PAL.noche; ctx.lineJoin = 'round'; ctx.strokeText(t, x, y, o.max); }
+    if (o.max) ctx.fillText(t, x, y, o.max); else ctx.fillText(t, x, y);
+    if ('letterSpacing' in ctx && o.ls) ctx.letterSpacing = '0px';
   }
 
   const capas = {};
@@ -38,16 +43,44 @@
     return c.cv;
   }
 
-  /** Franja superior común: escuela a la izquierda y título del juego (130 px de alto) */
+  /**
+   * Franja superior común (140 px), como el encabezado del bowling: título condensado con mucho
+   * espaciado, el modo en celeste debajo, el emblema de la escuela a la derecha y la línea azul.
+   */
   function encabezado(ctx, contexto, titulo, derecha) {
-    const cv = capa(`enc|${titulo}|${derecha || ''}|${contexto.config.colores.principal}`, 1080, 140, (g) => {
+    const logo = contexto.logo;
+    const listo = !!(logo && logo.complete && logo.naturalWidth);
+    const cv = capa(`enc|${titulo}|${derecha || ''}|${contexto.config.colores.principal}|${listo}`, 1080, 140, (g) => {
       g.fillStyle = PAL.noche; g.fillRect(0, 0, 1080, 140);
-      g.fillStyle = contexto.config.colores.principal; g.fillRect(0, 132, 1080, 8);
-      texto(g, (contexto.config.nombreCorto || '').toUpperCase(), 60, 56, { tam: 26, color: contexto.config.colores.secundario, peso: 600 });
-      texto(g, titulo.toUpperCase(), 60, 112, { tam: 56, peso: 800 });
-      if (derecha) texto(g, derecha, 1020, 112, { tam: 34, color: PAL.gris, alinear: 'right', peso: 700 });
+      g.fillStyle = contexto.config.colores.principal; g.fillRect(0, 136, 1080, 4);
+      if (listo) {
+        const t = 104, k = Math.min(t / logo.naturalWidth, t / logo.naturalHeight);
+        g.drawImage(logo, 1080 - 48 - logo.naturalWidth * k, (136 - logo.naturalHeight * k) / 2, logo.naturalWidth * k, logo.naturalHeight * k);
+      }
+      g.fillStyle = contexto.config.colores.acento; g.fillRect(48, 24, 12, 92);
+      texto(g, titulo.toUpperCase(), 84, 84, { tam: 66, peso: 800, ls: 6, max: 1080 - 84 - 190 });
+      if (derecha) texto(g, derecha.toUpperCase(), 86, 120, { tam: 26, peso: 700, ls: 3, color: contexto.config.colores.secundario });
     });
     ctx.drawImage(cv, 0, 0);
+  }
+
+  /** Título de sección como en el bowling: condensado en celeste con una línea a la derecha */
+  function seccion(ctx, etiqueta, x, y, hasta, color) {
+    texto(ctx, etiqueta.toUpperCase(), x, y, { tam: 28, peso: 700, ls: 4, color: color || PAL.celeste });
+    ctx.font = `700 28px ${TITULO}`;
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '4px';
+    const w = ctx.measureText(etiqueta.toUpperCase()).width;
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+    ctx.fillStyle = PAL.linea;
+    ctx.fillRect(x + w + 18, y - 9, Math.max(0, (hasta || 1020) - (x + w + 18)), 2);
+  }
+
+  /** Ficha con barra de color a la izquierda (jugadores) */
+  function ficha(ctx, x, y, w, h, color, fondo) {
+    ctx.fillStyle = fondo || PAL.panel;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, 10, h);
   }
 
   /** Rectángulo con esquinas apenas redondeadas */
@@ -70,5 +103,5 @@
   const suave = (t) => t * t * (3 - 2 * t);
   const salida = (t) => 1 - Math.pow(1 - t, 3);
 
-  window.Dibujo = { PAL, FUENTE, TITULO, texto, capa, encabezado, rect, tono, suave, salida };
+  window.Dibujo = { PAL, FUENTE, TITULO, texto, capa, encabezado, seccion, ficha, rect, tono, suave, salida };
 })();

@@ -158,7 +158,7 @@ function crearServidor(opts) {
     nombreEscuela: config.nombreEscuela,
     nombreCorto: config.nombreCorto,
     colores: config.colores,
-    logo: hayLogo() ? '/logo' : null,
+    logo: hayLogo() ? '/logo' : '/shared/emblema.svg', // sin logo.png se usa el emblema de la escuela redibujado
     rotarPantalla: config.rotarPantalla,
     margenSeguridad: config.margenSeguridad,
     maxJugadores: config.maxJugadores,
