@@ -8,7 +8,7 @@
     "fondo": "#0B1D30"
   },
   "logo": "public/logo.png",
-  "puerto": 3000,
+  "puerto": 3001,
   "rotarPantalla": 0,
   "margenSeguridad": 0,
   "maxJugadores": 6,

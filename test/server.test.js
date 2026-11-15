@@ -33,14 +33,14 @@ test('config.json mal escrito usa valores por defecto', () => {
   const warn = console.warn; console.warn = () => {};
   const c = loadConfig(f);
   console.warn = warn;
-  assert.equal(c.puerto, 3000);
+  assert.equal(c.puerto, 3001);
   assert.equal(c.rotarPantalla, 0);
   assert.equal(c.colores.principal, '#6272B4');
   assert.equal(c.colores.acento, '#112233');
   assert.equal(c.nombreEscuela, 'Mi escuela');
   fs.writeFileSync(f, '{ esto no es json');
   console.warn = () => {};
-  assert.equal(loadConfig(f).puerto, 3000);
+  assert.equal(loadConfig(f).puerto, 3001);
   console.warn = warn;
 });
 

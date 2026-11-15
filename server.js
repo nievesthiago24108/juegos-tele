@@ -25,7 +25,7 @@ const DEFAULTS = {
   nombreCorto: 'EI Nº4',
   colores: { principal: '#6272B4', secundario: '#7AB6E6', acento: '#F2A33A', fondo: '#0B1D30' },
   logo: 'public/logo.png',
-  puerto: 3000,
+  puerto: 3001,        // el Bowling Tótem usa el 3000: así pueden estar abiertos los dos a la vez
   rotarPantalla: 0,
   margenSeguridad: 0,   // como el bowling: la imagen ocupa toda la pantalla
   maxJugadores: 6,

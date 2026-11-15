@@ -51,13 +51,13 @@ npm start
 
 | Dirección | Para qué |
 |---|---|
-| `http://localhost:3000/` | La tele, en la notebook. |
-| `http://IP-DE-LA-NOTEBOOK:3000/j` | Los celulares. Es la que está en el QR, que se arma solo con la IP de la notebook. |
-| `http://localhost:3000/ranking` | Tablas de Hoy, Semana y Siempre de cada juego. |
+| `http://localhost:3001/` | La tele, en la notebook. |
+| `http://IP-DE-LA-NOTEBOOK:3001/j` | Los celulares. Es la que está en el QR, que se arma solo con la IP de la notebook. |
+| `http://localhost:3001/ranking` | Tablas de Hoy, Semana y Siempre de cada juego. |
 
 Al arrancar, la consola muestra la IP y el QR. Si la notebook tiene varias redes y el QR sale con la IP equivocada, se puede forzar la correcta: `IP_TELE=192.168.43.10 npm start`.
 
-> El Bowling Tótem también usa el puerto 3000. Si van a correr los dos a la vez en la misma compu, cambien `"puerto"` en `config.json`.
+> Los juegos de la tele usan el **puerto 3001** y el Bowling Tótem, el 3000. Así pueden estar abiertos los dos a la vez en la misma compu, cada uno con su QR.
 
 ### Teclas en la tele
 
@@ -114,7 +114,7 @@ Para que el kiosco se abra en la tele y no en la notebook hay dos opciones:
 1. Marcar la tele como **pantalla principal** (en Windows: *Convertir esta pantalla en la principal*).
 2. Editar la variable `POSICION` al principio de `iniciar.bat` o de `iniciar.sh`, poniendo dónde empieza la tele. Por ejemplo, `1920,0` si la notebook mide 1920 de ancho y la tele está a la derecha.
 
-También se puede abrir a mano y arrastrar la ventana a la tele: con Chrome o Edge, ir a `http://localhost:3000` y tocar **F** para pantalla completa.
+También se puede abrir a mano y arrastrar la ventana a la tele: con Chrome o Edge, ir a `http://localhost:3001` y tocar **F** para pantalla completa.
 
 ### Modo kiosco del navegador
 
@@ -127,7 +127,7 @@ Los scripts abren Chrome, Edge, Chromium o Brave con estas opciones:
 Para hacerlo a mano en Windows:
 
 ```bat
-"C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk --autoplay-policy=no-user-gesture-required http://localhost:3000
+"C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk --autoplay-policy=no-user-gesture-required http://localhost:3001
 ```
 
 ### «Modo juego» de la tele
@@ -155,7 +155,7 @@ Todo está en `config.json`. Si algo está mal escrito, se usa el valor por defe
 | `nombreEscuela`, `nombreCorto` | El nombre aparece en la tele, en los carteles de la cancha de Penales y en el celu. |
 | `colores.principal`, `secundario`, `acento`, `fondo` | Colores de la escuela, como `"#6272B4"`. Se usan en la tele, en las camisetas de Penales y en los carteles. |
 | `logo` | Ruta del logo, por defecto `public/logo.png`. Si el archivo no existe, se usa el emblema de la escuela redibujado en vector (`public/shared/emblema.svg`, el mismo del Bowling Tótem). Conviene un PNG cuadrado con fondo transparente, de unos 512x512. |
-| `puerto` | Por defecto, 3000. |
+| `puerto` | Por defecto, 3001 (el bowling usa el 3000). |
 | `rotarPantalla` | 0, 90 o -90 (ver punto 3). |
 | `margenSeguridad` | Porcentaje de borde alrededor de la imagen, para teles que recortan los bordes (por defecto, 0: pantalla completa como el bowling). |
 | `maxJugadores` | Celulares en la sala, de 2 a 6. |
@@ -183,11 +183,11 @@ Después de cambiar `config.json` hay que reiniciar el servidor. Para cambiar el
    - *Seguridad de Windows → Firewall → Permitir una aplicación* → tildar Node.js en Privada.
    - En una consola como administrador:
      ```bat
-     netsh advfirewall firewall add rule name="Juegos en la tele" dir=in action=allow protocol=TCP localport=3000
+     netsh advfirewall firewall add rule name="Juegos en la tele" dir=in action=allow protocol=TCP localport=3001
      ```
    Además, la red de la zona wifi tiene que estar como **Privada**: *Configuración → Red e Internet → Wi-Fi → (la red) → Tipo de perfil de red: Privada*.
 4. **El QR tiene una IP vieja.** Si la notebook cambió de red, reiniciar el servidor: el QR se vuelve a armar con la IP nueva.
-5. **Probar desde la notebook.** Abrir `http://IP-DE-LA-NOTEBOOK:3000/j`. Si ahí no carga, el problema es el firewall o la IP.
+5. **Probar desde la notebook.** Abrir `http://IP-DE-LA-NOTEBOOK:3001/j`. Si ahí no carga, el problema es el firewall o la IP.
 6. **Algunas zonas wifi aíslan a los dispositivos entre sí.** Pasa en algunos celulares, en opciones como «Aislamiento de clientes» o «Ocultar dispositivos». Probar con la zona wifi de otro celu.
 7. **VPN.** Una VPN activa en la notebook o en el celu puede bloquear la red local.
 8. **Si nada funciona:** jugar en **modo solo**, con mouse y teclado.
