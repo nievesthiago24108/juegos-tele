@@ -85,6 +85,10 @@ a.link { display: block; text-align: center; color: var(--celeste); font-family:
 .barra { display: flex; align-items: center; gap: 12px; padding: max(12px, env(safe-area-inset-top)) 18px 10px; border-bottom: 3px solid var(--azul); }
 .barra-color { width: 10px; height: 44px; flex: none; background: var(--yo); }
 .barra-textos { min-width: 0; }
+/* reloj del turno, como el del bowling: se pone naranja en los últimos 5 segundos */
+.reloj { margin-left: auto; min-width: 64px; text-align: center; font-family: var(--titulo); font-size: 36px; font-weight: 800; background: var(--panel); border-radius: 4px; padding: 2px 10px; flex: none; }
+.reloj.urgente { background: var(--naranja); color: var(--noche); }
+.reloj:not(.oculto) + .fantasma { margin-left: 0; }
 .barra-titulo { font-family: var(--titulo); font-size: 28px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; line-height: 1.05; }
 .barra-info { font-family: var(--titulo); font-size: 15px; color: var(--celeste); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
 .ctl-mensaje { padding: 10px 18px 0; margin: 0; min-height: 30px; }

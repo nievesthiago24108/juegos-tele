@@ -27,7 +27,7 @@ const DEFAULTS = {
   logo: 'public/logo.png',
   puerto: 3000,
   rotarPantalla: 0,
-  margenSeguridad: 4,
+  margenSeguridad: 0,   // como el bowling: la imagen ocupa toda la pantalla
   maxJugadores: 6,
   creditos: 'Hecho por 5ºI Informática',
   memoria: {},
@@ -450,6 +450,7 @@ function crearServidor(opts) {
       if (!accion) return;
       aTele('anfitrion', {
         accion,
+        jugadorId: p.id, // quién eligió (en Solo, ese celu es el que juega)
         juego: typeof d.juego === 'string' ? d.juego.slice(0, 40) : null,
         modo: typeof d.modo === 'string' ? d.modo.slice(0, 40) : null,
         tecla: typeof d.tecla === 'string' ? d.tecla.slice(0, 12) : null,

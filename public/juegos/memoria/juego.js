@@ -357,7 +357,7 @@
       if (fase === 'mezcla') return 'Se mezclan los botones';
       if (fase === 'respondiendo') {
         const extra = info.especial === 'alreves' ? ' al revés' : info.especial === 'trampa' ? ' (color de la letra)' : '';
-        if (modo === 'solo') return `Repetí la secuencia${extra} · ${resp ? resp.indice : 0} de ${esperadoActual.length}`;
+        if (modo === 'solo') return `Repetí la secuencia${extra}${cx.conCelu ? ' en tu celu' : ''} · ${resp ? resp.indice : 0} de ${esperadoActual.length}`;
         if (modo === 'cooperativo') return `Repitan la secuencia${extra} entre todos`;
         return `Repitan la secuencia en el celu${extra}`;
       }
@@ -383,6 +383,15 @@
     }
 
     function dibujarJugadores(ctx) {
+      if (modo === 'solo' && cx.conCelu) {
+        const j = jugadores[0];
+        D.seccion(ctx, 'Jugador', 60, 1594);
+        D.ficha(ctx, 60, 1620, 960, 96, j.color, P.panel2);
+        D.texto(ctx, j.nombre, 90, 1682, { tam: 44, peso: 700, fuente: 'texto', max: 600 });
+        D.texto(ctx, 'JUEGA CON EL CELU', 990, 1680, { tam: 24, peso: 700, ls: 2, color: P.celeste, alinear: 'right' });
+        D.texto(ctx, `También funcionan el mouse y las teclas 1 a ${posiciones.length}`, 60, 1790, { tam: 34, peso: 600, fuente: 'texto', color: P.gris });
+        return;
+      }
       if (modo === 'solo') {
         D.seccion(ctx, 'Cómo se juega', 60, 1594);
         D.texto(ctx, `Clic en el botón, o teclas 1 a ${posiciones.length}`, 60, 1660, { tam: 44, peso: 700, fuente: 'texto' });
@@ -469,6 +478,8 @@
       },
 
       recibirInput(id, datos, ts) {
+        // Solo con celu: el toque del celu hace lo mismo que el clic o la tecla
+        if (modo === 'solo') { if (datos.boton != null) { cursor = -1; tocarSolo(Number(datos.boton)); } return; }
         if (modo !== 'eliminacion' || fase !== 'respondiendo' || datos.boton == null) return;
         const e = est[id];
         if (!e || e.estado !== 'respondiendo' || !e.resp) return;
@@ -613,6 +624,14 @@
         if (fase !== 'respondiendo') {
           return { tipo: 'espera', id: `ver-${nivel}-${rondaN}`, titulo: `Nivel ${nivel}`, mensaje: especial || 'El celu no muestra la secuencia', grande: 'Mirá la tele y memorizá' };
         }
+        if (modo === 'solo') {
+          const activo = resp && resp.estado === 'respondiendo';
+          return {
+            tipo: 'botones', id: `solo-${nivel}-${rondaN}`, titulo: especial || 'Repetí la secuencia', mensaje: `Nivel ${nivel} · ${esperadoActual.length} colores`,
+            columnas: 2, bloqueado: !activo,
+            botones: posiciones.map((c) => ({ id: c, color: colores[c].color, simbolo: colores[c].simbolo, texto: colores[c].etiqueta })),
+          };
+        }
         if (modo === 'eliminacion') {
           if (e.estado === 'listo') return { tipo: 'espera', id: `listo-${nivel}`, titulo: '✓ Listo', mensaje: 'Esperá a los demás', grande: 'Bien' };
           if (e.estado !== 'respondiendo') return { tipo: 'espera', id: 'mirando', grande: 'Mirá la tele' };
@@ -634,6 +653,16 @@
       resultados() {
         if (modo === 'solo') {
           const pts = L.puntaje(alcanzado, bonusSolo);
+          const j = jugadores[0];
+          if (j) {
+            return {
+              titulo: `Nivel ${alcanzado}`,
+              subtitulo: `${pts} puntos · ${razonFin || ''}`,
+              filas: [{ nombre: j.nombre, color: j.color, valor: `Nivel ${alcanzado}`, detalle: `${pts} puntos`, destacado: true }],
+              registros: alcanzado > 0 ? [{ categoria: 'individual', puntaje: pts, jugadorIds: [j.id], detalle: { nivel: alcanzado } }] : [],
+              celular: { [j.id]: { titulo: `Llegaste al nivel ${alcanzado}`, mensaje: `${pts} puntos` } },
+            };
+          }
           return {
             titulo: `Nivel ${alcanzado}`,
             subtitulo: `${pts} puntos · ${razonFin || ''}`,

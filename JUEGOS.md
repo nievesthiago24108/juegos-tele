@@ -30,7 +30,9 @@ public/juegos/<id>/
 }
 ```
 
-- Un modo con `"celulares": false` es un **modo solo**: se juega en la tele con mouse y teclado, sin celulares. Todos los juegos tienen que tener uno, por si falla el wifi.
+- Un modo con `"celulares": false` es un **modo solo**. Todos los juegos tienen que tener uno.
+  - Si el modo se elige desde la tele, se juega con mouse y teclado, sin celulares. Es el plan B por si falla el wifi.
+  - Si lo elige el anfitrión desde su celu, juega ese celu, como en el bowling: `jugadores` trae ese único jugador y `contexto.conCelu` es `true`. El mouse y el teclado siguen funcionando igual.
 - `min` y `max` son la cantidad de celulares. Si hay menos de `min`, el menú muestra «faltan N». Si hay más de `max`, juegan los primeros y los demás esperan.
 - `formato` es opcional y cambia cómo se muestra el puntaje en el ranking:
   - `"nivel"`: muestra «Nivel N», con N = puntaje / 100.
@@ -81,7 +83,8 @@ Funciones opcionales:
 | `ancho`, `alto` | 1080 y 1920. |
 | `config` | `config.json` ya validado: `nombreEscuela`, `colores`, y la sección del juego, por ejemplo `config.memoria`. |
 | `juego`, `modo` | Los manifiestos de `juego.json`. |
-| `solo` | `true` si es el modo sin celulares. |
+| `solo` | `true` si es un modo solo. |
+| `conCelu` | `true` si el modo solo lo juega un celu (el que lo eligió). Entonces `jugadores` trae ese jugador y los resultados van con `jugadorIds`. |
 | `sonido` | Sonidos sintetizados (`/shared/sonido.js`): `tono(f, dur)`, `ruido(dur, {filtro})`, `bien()`, `error()`, `festejo()`, `silbato()`, `patada()`, `red()`, `hinchada()`… |
 | `formas` | `formas.dibujar(ctx, '★', x, y, r, color)` dibuja ● ▲ ■ ★ ◆ ✚ sin depender de la fuente. |
 | `trazo` | `trazo.analizar(puntos)` devuelve la dirección, la fuerza y la curva de un trazo. |
@@ -106,7 +109,7 @@ En `/shared/dibujo.js` (`window.Dibujo`) hay ayudas con el estilo de la escuela:
 | `"deslizar"` | `{ tipo: 'deslizar', id: 'tiro-3' }` | `{ trazo: [{ x, y, t }], t }`, con x e y en «altos de pantalla» y t en ms desde el inicio |
 | `"espera"` | `{ tipo: 'espera', titulo: 'Turno de Ana', grande: 'Mirá la tele' }` | — |
 
-`bloqueado: true` muestra el control apagado. `t` es la hora del toque, ya corregida a la hora del servidor: el celu sincroniza el reloj al conectarse.
+`bloqueado: true` muestra el control apagado. `limite` (hora del servidor en ms, por ejemplo `contexto.horaServidor() + 15000`) muestra arriba a la derecha un reloj con los segundos que quedan, que se pone naranja en los últimos 5, como en el bowling. `t` es la hora del toque, ya corregida a la hora del servidor: el celu sincroniza el reloj al conectarse.
 
 ## 4. Parte de servidor (opcional)
 
@@ -138,7 +141,8 @@ module.exports = function crear(api) {      // api: { aTele(datos), ahora(), log
 ```
 
 - **Con celulares**, cada registro lleva `jugadorIds`. El nombre lo pone el servidor, así nadie puede inventar un jugador. Si son varios, es un puntaje de equipo y se guardan todos los nombres.
-- **En modo solo**, los registros van sin nombre: la plataforma muestra un teclado en pantalla para escribirlo, con el mouse o con el teclado físico, y después lo guarda. En las filas, `esJugadorSolo: true` hace que se muestre el nombre escrito.
+- **En modo solo con celu**, igual que con celulares: `jugadorIds: [id]`, y el nombre sale del celu.
+- **En modo solo sin celu**, los registros van sin nombre: la plataforma muestra un teclado en pantalla para escribirlo, con el mouse o con el teclado físico, y después lo guarda. En las filas, `esJugadorSolo: true` hace que se muestre el nombre escrito.
 - Todo se guarda en `data/puntajes.jsonl`, un renglón por puntaje, y se ve en `/ranking`.
 
 ## 6. Reglas de la casa

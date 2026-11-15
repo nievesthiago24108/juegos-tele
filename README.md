@@ -4,11 +4,11 @@ Juegos para mostrar en un **televisor puesto en vertical** (el juego mide 1080 d
 
 | Juego | Modos |
 |---|---|
-| **Memoria de colores** (tipo Simón dice) | Solo (mouse o teclado) · Eliminación (2 a 6 celus) · Cooperativo (2 a 4 celus) |
-| **Penales** | Solo (mouse contra el arquero de la compu) · 1 contra 1 (2 celus) · Torneo (2 a 6 celus) |
-| **Tocá rápido** (juego de ejemplo) | Solo (mouse o barra espaciadora) · Con celulares (1 a 6) |
+| **Memoria de colores** (tipo Simón dice) | Solo (celu, mouse o teclado) · Eliminación (2 a 6 celus) · Cooperativo (2 a 4 celus) |
+| **Penales** | Solo (celu o mouse, contra el arquero de la compu) · 1 contra 1 (2 celus) · Torneo (2 a 6 celus) |
+| **Tocá rápido** (juego de ejemplo) | Solo (celu, mouse o barra espaciadora) · Con celulares (1 a 6) |
 
-Todos los juegos tienen un **modo solo** que se juega en la tele con el mouse y el teclado, sin celulares: es el plan B si falla el wifi. Los puntajes se guardan en un ranking que se ve en la tele y en `/ranking`.
+Como en el bowling, **todo se puede jugar desde el celular**, aunque sea un solo jugador: si el anfitrión elige el modo **Solo** desde su celu, juega con el celu. Si el Solo se elige desde la tele, se juega con el mouse y el teclado: es el plan B si falla el wifi. Los puntajes se guardan en un ranking que se ve en la tele y en `/ranking`.
 
 Para programar un juego nuevo, ver [JUEGOS.md](JUEGOS.md).
 
@@ -72,7 +72,7 @@ Al arrancar, la consola muestra la IP y el QR. Si la notebook tiene varias redes
 | 1 a 6, flechas, Enter | Memoria, en modo solo. |
 | Clic y arrastrar | Penales, en modo solo. |
 
-También se puede elegir todo con el mouse: un clic en el modo lo elige y un segundo clic empieza la partida. El **primer celular que entra es el anfitrión**: puede elegir juego y modo desde el celu, y al final de cada partida elegir «Jugar otra vez» o «Volver al menú».
+También se puede elegir todo con el mouse: un clic en el modo lo elige y un segundo clic empieza la partida. El **primer celular que entra es el anfitrión**: puede elegir juego y modo desde el celu, y al final de cada partida elegir «Jugar otra vez» o «Volver al menú». Si el anfitrión elige **Solo**, juega él con su celu; los demás ven «Juega Ana. Jugás en la próxima».
 
 El cursor del mouse se esconde solo si no se mueve durante 3 segundos.
 
@@ -100,7 +100,7 @@ Si no se puede girar la pantalla desde el sistema, por ejemplo por falta de perm
 
 ### Margen de seguridad
 
-Muchas teles recortan un poco los bordes de la imagen. Por eso el juego deja un margen negro del 4% alrededor, configurable con `"margenSeguridad"` (de 0 a 10) en `config.json`. Si la tele tiene la opción *Ajustar a pantalla*, *Just Scan* o *Pixel a pixel*, conviene activarla y bajar el margen.
+Igual que el Bowling Tótem, el juego ocupa toda la pantalla. Algunas teles recortan un poco los bordes de la imagen: en ese caso, conviene activar en la tele la opción *Ajustar a pantalla*, *Just Scan* o *Pixel a pixel*. Si la tele no la tiene, se puede dejar un borde con `"margenSeguridad"` en `config.json` (de 0 a 10, en porcentaje; por ejemplo, 4).
 
 ## 4. La tele como pantalla extendida
 
@@ -157,7 +157,7 @@ Todo está en `config.json`. Si algo está mal escrito, se usa el valor por defe
 | `logo` | Ruta del logo, por defecto `public/logo.png`. Si el archivo no existe, se usa el emblema de la escuela redibujado en vector (`public/shared/emblema.svg`, el mismo del Bowling Tótem). Conviene un PNG cuadrado con fondo transparente, de unos 512x512. |
 | `puerto` | Por defecto, 3000. |
 | `rotarPantalla` | 0, 90 o -90 (ver punto 3). |
-| `margenSeguridad` | Porcentaje de borde negro (por defecto, 4). |
+| `margenSeguridad` | Porcentaje de borde alrededor de la imagen, para teles que recortan los bordes (por defecto, 0: pantalla completa como el bowling). |
 | `maxJugadores` | Celulares en la sala, de 2 a 6. |
 | `memoria.colores` | Los 6 colores de Memoria. Cada uno lleva `color`, `simbolo` (● ▲ ■ ★ ◆ ✚ u otra letra), `palabra` (lo que se lee en la ronda «trampa») y `etiqueta` (texto opcional en el botón, por ejemplo un lugar de la escuela: `"Taller"`, `"Biblioteca"`). |
 | `penales.dificultad` | `"facil"`, `"normal"` o `"dificil"`, para el arquero automático. |

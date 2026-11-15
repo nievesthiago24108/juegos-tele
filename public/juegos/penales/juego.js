@@ -34,6 +34,7 @@
     let tiro = null, res = null;
     let trazo = null;             // trazo del mouse en curso [{x,y,t}] en px del lienzo
     let aviso = '';
+    let limiteTiro = 0;           // hora (del reloj de la notebook) en que se acaban los 15 s para patear
     // por modo
     const solo = { racha: 0, mejor: 0, errados: 0, goles: 0, tiros: 0, historial: [] };
     const tanda = [[], []];       // 1 contra 1: goles (true/false) de cada jugador
@@ -70,7 +71,8 @@
         pateador = ordenTorneo[n - 1];
         arquero = null;
       } else {
-        pateador = null; arquero = null;
+        // Solo: si se eligió desde un celu, patea ese celu (el mouse sigue andando)
+        pateador = jugadores[0] || null; arquero = null;
       }
       fase = 'preparar'; tf = 0;
       cx.actualizarControles();
@@ -80,6 +82,7 @@
 
     function empezarApuntar() {
       fase = 'apuntar'; tf = 0;
+      limiteTiro = cx.horaServidor() + LIMITE_TIRO * 1000;
       cx.sonido.silbato(false);
       cx.actualizarControles();
     }
@@ -472,7 +475,10 @@
       let linea1 = '', linea2 = '';
       if (fase === 'apuntar') {
         const resta = Math.max(0, Math.ceil(LIMITE_TIRO - tf));
-        if (modo === 'solo') {
+        if (modo === 'solo' && pateador) {
+          linea1 = `Patea ${pateador.nombre}: deslizá en tu celu`;
+          linea2 = `También se puede arrastrar con el mouse · ${resta} s`;
+        } else if (modo === 'solo') {
           linea1 = 'Hacé clic en la pelota y arrastrá hacia el arco';
           linea2 = `Más rápido = más fuerte · trazo curvo = comba · ${resta} s`;
         } else {
@@ -485,7 +491,7 @@
         linea1 = pateador ? `${pateador.nombre} toma carrera…` : 'Tomando carrera…';
         linea2 = esUno() ? `${arquero.nombre}: ${zonaElegida == null ? 'elegí rápido' : 'ya eligió ✓'}` : '';
       } else if (fase === 'preparar') {
-        linea1 = modo === 'solo' ? `Tiro ${n}` : `Patea ${pateador.nombre}`;
+        linea1 = modo === 'solo' ? `Tiro ${n}${pateador ? ` · patea ${pateador.nombre}` : ''}` : `Patea ${pateador.nombre}`;
         linea2 = esUno() ? `Ataja ${arquero.nombre}` : esTorneo() ? `Tiro ${Math.ceil(n / jugadores.length)} de 5` : '';
       }
       D.texto(ctx, linea1, 60, 1850, { tam: 40, peso: 700, fuente: 'texto' });
@@ -716,8 +722,8 @@
         const esPateador = pateador && pateador.id === id;
         const esArquero = arquero && arquero.id === id;
         if (esPateador) {
-          if (fase === 'preparar') return { tipo: 'espera', id: `prep-${n}`, titulo: 'Te toca patear', grande: 'Preparate', mensaje: arquero ? `Ataja ${arquero.nombre}` : 'Contra el arquero de la compu' };
-          if (fase === 'apuntar') return { tipo: 'deslizar', id: `tiro-${n}-${intento}`, titulo: 'Te toca patear', mensaje: aviso || 'Deslizá desde la pelota hacia el arco. Rápido = fuerte' };
+          if (fase === 'preparar') return { tipo: 'espera', id: `prep-${n}`, titulo: modo === 'solo' ? `Tiro ${n}` : 'Te toca patear', grande: 'Preparate', mensaje: arquero ? `Ataja ${arquero.nombre}` : 'Contra el arquero de la compu' };
+          if (fase === 'apuntar') return { tipo: 'deslizar', id: `tiro-${n}-${intento}`, titulo: 'Te toca patear', limite: limiteTiro, mensaje: aviso || 'Deslizá desde la pelota hacia el arco. Rápido = fuerte' };
           if (fase === 'carrera' || fase === 'vuelo') return { tipo: 'espera', id: `pateo-${n}`, titulo: 'Pateaste', grande: 'Mirá la tele' };
           return { tipo: 'espera', id: `res-${n}`, titulo: res ? TEXTOS[res.resultado].t : '', grande: 'Mirá la tele' };
         }
@@ -737,6 +743,16 @@
       terminado() { return fase === 'fin' && tf >= T_FIN; },
 
       resultados() {
+        if (modo === 'solo' && jugadores[0]) {
+          const j = jugadores[0];
+          return {
+            titulo: `${solo.mejor} ${solo.mejor === 1 ? 'gol seguido' : 'goles seguidos'}`,
+            subtitulo: `${solo.goles} goles en ${solo.tiros} tiros`,
+            filas: [{ nombre: j.nombre, color: j.color, valor: `${solo.mejor} seguidos`, detalle: `${solo.goles} de ${solo.tiros}`, destacado: true }],
+            registros: solo.mejor > 0 ? [{ categoria: 'seguidos', puntaje: solo.mejor, jugadorIds: [j.id], detalle: { goles: solo.goles, tiros: solo.tiros } }] : [],
+            celular: { [j.id]: { titulo: `${solo.mejor} ${solo.mejor === 1 ? 'gol seguido' : 'goles seguidos'}`, mensaje: `${solo.goles} goles en ${solo.tiros} tiros` } },
+          };
+        }
         if (modo === 'solo') {
           return {
             titulo: `${solo.mejor} ${solo.mejor === 1 ? 'gol seguido' : 'goles seguidos'}`,

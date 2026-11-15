@@ -44,7 +44,7 @@
     const girada = estado.rotacion !== 0;
     const anchoDisp = girada ? vh : vw;
     const altoDisp = girada ? vw : vh;
-    const margen = (estado.config ? estado.config.margenSeguridad : 4) / 100;
+    const margen = (estado.config ? estado.config.margenSeguridad : 0) / 100;
     estado.escala = Math.min(anchoDisp * (1 - 2 * margen) / ANCHO, altoDisp * (1 - 2 * margen) / ALTO);
     escenario.style.transform = `translate(-50%, -50%) rotate(${estado.rotacion}deg) scale(${estado.escala})`;
   }
@@ -136,7 +136,7 @@
       const mi = estado.juegos[ji].modos.findIndex((x) => x.id === m.modo);
       estado.sel = { juego: ji, modo: Math.max(0, mi) };
       dibujarMenu();
-      empezarSeleccion();
+      empezarSeleccion(m.jugadorId);
     } else if (m.accion === 'menu') {
       volverAlMenu();
     } else if (m.accion === 'otra' && estado.fase === 'resultados') {
@@ -182,7 +182,7 @@
     if (!modo.celulares) return 0;
     return Math.max(0, modo.min - conectados().length);
   }
-  const rangoModo = (m) => (m.celulares ? (m.min === m.max ? `${m.min} celulares` : `${m.min} a ${m.max} celulares`) : 'mouse y teclado');
+  const rangoModo = (m) => (m.celulares ? (m.min === m.max ? `${m.min} celulares` : `${m.min} a ${m.max} celulares`) : 'celu o mouse');
 
   function dibujarMenu() {
     const ul = $('lista-juegos');
@@ -306,7 +306,8 @@
     return 'p-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
   }
 
-  function empezarSeleccion() {
+  /** celuId: el celu que eligió el juego (en Solo, juega ese celu); sin celuId se eligió desde la tele */
+  function empezarSeleccion(celuId) {
     const j = estado.juegos[estado.sel.juego];
     if (!j) return;
     const m = j.modos[estado.sel.modo];
@@ -316,19 +317,25 @@
       cartel(`Para «${m.nombre}» faltan ${f} jugador${f > 1 ? 'es' : ''} con celular. Escaneen el QR.`, 3200);
       return;
     }
-    empezar(j, m);
+    empezar(j, m, celuId);
   }
 
-  function empezar(manifiesto, modo) {
+  const comoJugador = (j) => ({ id: j.id, nombre: j.nombre, color: j.color, conectado: true });
+
+  function empezar(manifiesto, modo, celuId) {
     const fabrica = estado.fabricas[manifiesto.id];
     if (!fabrica) { cartel('Ese juego no se pudo cargar.'); return; }
     let jugadores = [];
     if (modo.celulares) {
-      jugadores = conectados().slice(0, modo.max).map((j) => ({ id: j.id, nombre: j.nombre, color: j.color, conectado: true }));
+      jugadores = conectados().slice(0, modo.max).map(comoJugador);
+    } else if (celuId) {
+      // Solo elegido desde un celu: juega ese celu (como en el bowling). Desde la tele: mouse y teclado.
+      const j = conectados().find((x) => x.id === celuId);
+      if (j) jugadores = [comoJugador(j)];
     }
     let instancia;
     try { instancia = fabrica(); } catch (err) { console.error(err); cartel('Error al crear el juego.'); return; }
-    estado.actual = { manifiesto, modo, instancia, jugadores, partidaId: idPartida(), solo: !modo.celulares };
+    estado.actual = { manifiesto, modo, instancia, jugadores, partidaId: idPartida(), solo: !modo.celulares, celuId: jugadores.length && !modo.celulares ? jugadores[0].id : null };
     estado.controlesEnviados = {};
     estado.ultimoResultado = null;
     mostrar('jugando');
@@ -343,7 +350,8 @@
     // los que no entran en esta partida esperan
     const ids = new Set(jugadores.map((j) => j.id));
     conectados().filter((j) => !ids.has(j.id)).forEach((j) => {
-      socket.emit('tele:control', { jugadorId: j.id, control: { tipo: 'espera', titulo: 'Partida en curso', mensaje: `Esta partida es de ${modo.max}. Jugás en la próxima.` } });
+      const quien = jugadores.length === 1 ? `Juega ${jugadores[0].nombre}` : modo.celulares ? `Esta partida es de ${modo.max}` : 'Se juega en la tele';
+      socket.emit('tele:control', { jugadorId: j.id, control: { tipo: 'espera', titulo: 'Partida en curso', mensaje: `${quien}. Jugás en la próxima.` } });
     });
     actualizarControles(true);
     avisarFase();
@@ -359,6 +367,7 @@
       juego: a.manifiesto,
       modo: a.modo,
       solo: a.solo,
+      conCelu: a.solo && a.jugadores.length === 1, // Solo jugado con un celu (además de mouse y teclado)
       partidaId: a.partidaId,
       sonido: window.Sonido,
       formas: window.Formas,
@@ -410,7 +419,7 @@
       socket.emit('tele:control', { jugadorId: j.id, control: { tipo: 'espera', titulo: (msj && msj.titulo) || 'Terminó la partida', mensaje: (msj && msj.mensaje) || 'Mirá la tele' } });
     });
     const registros = (res.registros || []).filter((r) => r && r.categoria);
-    if (a.solo) {
+    if (a.solo && !a.jugadores.length) {
       const valen = registros.filter((r) => r.puntaje > 0);
       if (valen.length) { pedirNombre(res, valen); return; }
       mostrarResultados(res, null);
@@ -488,7 +497,7 @@
     if (!a) return volverAlMenu();
     const f = faltan(a.modo);
     if (f) { cartel(`Faltan ${f} jugadores con celular.`); return; }
-    empezar(a.manifiesto, a.modo);
+    empezar(a.manifiesto, a.modo, a.celuId);
   }
 
   function volverAlMenu() {

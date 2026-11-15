@@ -142,7 +142,7 @@
     $('lista-juegos').innerHTML = juegos.map((j) => `<div class="anf-juego"><h3>${esc(j.nombre)}</h3><p>${esc(j.descripcion)}</p><div class="anf-modos">` +
       j.modos.map((m) => {
         const falta = m.celulares ? Math.max(0, m.min - n) : 0;
-        const det = m.celulares ? (falta ? `faltan ${falta}` : (m.min === m.max ? `${m.min} celulares` : `${m.min} a ${m.max} celulares`)) : 'en la tele, con mouse';
+        const det = m.celulares ? (falta ? `faltan ${falta}` : (m.min === m.max ? `${m.min} celulares` : `${m.min} a ${m.max} celulares`)) : '1 jugador, con tu celu';
         return `<button data-j="${esc(j.id)}" data-m="${esc(m.id)}" ${falta ? 'disabled' : ''}>${esc(m.nombre)}<small>${esc(det)}</small></button>`;
       }).join('') + '</div></div>').join('');
   }
@@ -303,6 +303,17 @@
     caja.addEventListener('pointercancel', () => { activo = false; puntos = []; pintar(); });
     if (lanzado()) caja.classList.add('listo');
   }
+
+  // reloj del turno (control.limite = hora del servidor en que se acaba el tiempo)
+  setInterval(() => {
+    const el = $('ctl-reloj');
+    const lim = control && Number(control.limite);
+    if (!lim || $('pant-control').classList.contains('oculto')) { el.classList.add('oculto'); return; }
+    const resta = Math.max(0, Math.ceil((lim - ahoraServidor()) / 1000));
+    el.textContent = resta;
+    el.classList.toggle('urgente', resta <= 5);
+    el.classList.remove('oculto');
+  }, 200);
 
   // ---------------------------------------------------------------- arranque
   fetch('/api/config').then((r) => r.json()).then((c) => {

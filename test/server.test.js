@@ -151,3 +151,22 @@ test('payloads raros no tiran abajo el servidor', async () => {
     assert.ok(c.qr);
   } finally { await t.cerrar(); }
 });
+
+test('Solo con celu: el puntaje lleva el nombre del celu y el anfitrión manda quién eligió', async () => {
+  const t = await levantar();
+  try {
+    const tele = await t.conectar();
+    await t.emitir(tele, 'tele:hola');
+    const a = await t.conectar();
+    const ra = await t.emitir(a, 'jugador:unirse', { nombre: 'Ana' });
+    const llega = esperar(tele, 'anfitrion');
+    a.emit('anfitrion:accion', { accion: 'elegir', juego: 'memoria', modo: 'solo' });
+    const m = await llega;
+    assert.equal(m.jugadorId, ra.id, 'la tele sabe qué celu eligió el Solo');
+    const r = await t.emitir(tele, 'tele:puntajes', {
+      partidaId: 'p-solo-celu', juego: 'memoria', modo: 'solo',
+      registros: [{ categoria: 'individual', puntaje: 512, jugadorIds: [ra.id], nombre: 'Otro' }],
+    });
+    assert.deepEqual(r.guardados.map((g) => [g.registro.nombre, g.registro.puntaje, g.registro.modo]), [['Ana', 512, 'solo']]);
+  } finally { await t.cerrar(); }
+});

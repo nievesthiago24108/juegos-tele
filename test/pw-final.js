@@ -138,6 +138,72 @@ async function contarRanking(base) {
     const id = async (p) => p.evaluate(() => window.Celu.yo.id);
     const ids = { Ana: await id(ana), Beto: await id(beto), Caro: await id(caro) };
 
+    // Solo con celu (como el bowling): Ana elige el Solo desde su celu y juega con el celu
+    const volver = async () => { await ana.click('#btn-volver'); await u.esperarFase(tele, 'menu'); };
+    const sinTeclado = async () => {
+      await tele.waitForFunction(() => ['nombre', 'resultados'].includes(window.Plataforma.estado.fase), null, { timeout: 20000 });
+      return (await tele.evaluate(() => window.Plataforma.estado.fase)) === 'resultados';
+    };
+    await ana.click('button[data-j="toca-rapido"][data-m="solo"]');
+    await u.esperarFase(tele, 'jugando');
+    await beto.waitForFunction(() => window.Celu.control && /Juega Ana/.test(window.Celu.control.mensaje || ''));
+    await ana.waitForSelector('.btn-color', { timeout: 8000 });
+    await ana.waitForSelector('#ctl-reloj:not(.oculto)');
+    await u.captura(ana, 'f10-celu-solo-toca-reloj');
+    for (let i = 0; i < 8; i++) { await ana.click('.btn-color'); await u.sleep(60); }
+    u.revisar(await sinTeclado(), 'Tocá rápido Solo con celu: termina sin teclado en pantalla');
+    await guardado(tele);
+    const st = await tele.evaluate(() => window.Plataforma.estado.ultimoResultado);
+    u.revisar(st.filas[0].nombre === 'Ana' && st.filas[0].valor === 8, `Tocá rápido Solo con celu: Ana hizo ${st.filas[0].valor} toques desde el celu`);
+    await volver();
+
+    await ana.click('button[data-j="memoria"][data-m="solo"]');
+    await u.esperarFase(tele, 'jugando');
+    for (let n = 1; n <= 2; n++) {
+      await faseJuego(tele, 'respondiendo');
+      const e = await est(tele);
+      await ana.waitForSelector('.btn-color:not([disabled])', { timeout: 5000 });
+      for (const c of e.esperado) { await ana.click(`.btn-color[data-id="${c}"]`); await u.sleep(80); }
+      if (n === 2) await u.captura(tele, 'f11-memoria-solo-celu');
+      await faseJuego(tele, 'bien', 5000);
+    }
+    await faseJuego(tele, 'respondiendo');
+    const em = await est(tele);
+    await ana.waitForSelector('.btn-color:not([disabled])', { timeout: 5000 });
+    await u.captura(ana, 'f12-celu-solo-memoria');
+    await ana.click(`.btn-color[data-id="${em.posiciones.find((c) => c !== em.esperado[0])}"]`);
+    u.revisar(await sinTeclado(), 'Memoria Solo con celu: termina sin teclado en pantalla');
+    await guardado(tele);
+    const rkm = await (await fetch(base + '/api/ranking?n=50')).json();
+    const indiv = rkm.juegos.find((j) => j.id === 'memoria').rankings.find((r) => r.id === 'individual').hoy;
+    u.revisar(indiv.some((x) => x.nombre === 'Ana' && x.modo === 'solo' && Math.floor(x.puntaje / 100) === 2), 'Memoria Solo con celu: queda en el ranking como Ana, nivel 2');
+    await volver();
+
+    await ana.click('button[data-j="penales"][data-m="solo"]');
+    await u.esperarFase(tele, 'jugando');
+    let tirosCelu = 0;
+    while ((await est(tele)).solo.errados < 3) {
+      await faseJuego(tele, 'apuntar');
+      await ana.waitForSelector('.deslizar');
+      if (tirosCelu === 0) {
+        await ana.waitForSelector('#ctl-reloj:not(.oculto)');
+        await u.deslizar(ana, { x: 0.6, y: 0.6, fuerza: 0.55, alMedio: () => u.captura(ana, 'f13-celu-solo-penales') });
+      } else {
+        await u.deslizar(ana, { x: 1.8, y: 0.4, fuerza: 0.55 });
+      }
+      await faseJuego(tele, 'resultado', 12000);
+      if (tirosCelu === 0) {
+        const r = await est(tele);
+        u.revisar(r.pateador === ids.Ana && Math.abs(r.tiro.x - 0.6) < 0.3, `Penales Solo con celu: Ana patea desde el celu (x=${r.tiro.x}) → ${r.resultado}`);
+        await u.sleep(400); await u.captura(tele, 'f14-penales-solo-celu');
+      }
+      tirosCelu++;
+    }
+    u.revisar(await sinTeclado(), 'Penales Solo con celu: termina al errar 3, sin teclado en pantalla');
+    const sp = await tele.evaluate(() => window.Plataforma.estado.ultimoResultado);
+    u.revisar(sp.filas[0].nombre === 'Ana', `Penales Solo con celu: resultado a nombre de Ana (${sp.titulo})`);
+    await volver();
+
     // Tocá rápido con celus: Beto recarga la página en medio de la partida y sigue tocando
     await ana.click('button[data-j="toca-rapido"][data-m="celus"]');
     await u.esperarFase(tele, 'jugando');

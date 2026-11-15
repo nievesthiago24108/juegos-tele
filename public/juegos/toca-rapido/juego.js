@@ -16,6 +16,7 @@
     const toques = {};    // jugadorId (o 'solo') → cantidad
     const ondas = [];     // efectos de clic { x, y, t, color }
     let finEspera = 0;
+    let limite = 0;       // hora (reloj de la notebook) en que terminan los 10 s, para el reloj del celu
 
     function sumar(id, x, y, color) {
       if (fase !== 'jugando') return;
@@ -33,6 +34,8 @@
       recibirInput(id, datos) {
         if (datos.boton == null) return;
         const j = jugadores.find((x) => x.id === id);
+        // Solo con celu: el botón del celu suma igual que el clic o la barra
+        if (solo) { sumar('solo', 540 + (Math.random() - 0.5) * 500, 900 + (Math.random() - 0.5) * 400, j ? j.color : D.PAL.naranja); return; }
         const i = jugadores.indexOf(j);
         sumar(id, 540 + (Math.random() - 0.5) * 600, 700 + i * 30 + (Math.random() - 0.5) * 300, j ? j.color : D.PAL.naranja);
       },
@@ -49,7 +52,7 @@
         if (fase === 'cuenta') {
           const n = Math.ceil(CUENTA - t);
           if (n !== ultimaCuenta && n > 0) { ultimaCuenta = n; cx.sonido.cuenta(false); }
-          if (t >= CUENTA) { fase = 'jugando'; t = 0; cx.sonido.cuenta(true); cx.actualizarControles(); }
+          if (t >= CUENTA) { fase = 'jugando'; t = 0; limite = cx.horaServidor() + DURACION * 1000; cx.sonido.cuenta(true); cx.actualizarControles(); }
         } else if (fase === 'jugando' && t >= DURACION) {
           fase = 'fin'; t = 0; cx.sonido.silbato(true); cx.actualizarControles();
         } else if (fase === 'fin') {
@@ -79,7 +82,7 @@
           const n = Math.ceil(CUENTA - t);
           const k = 1 - (CUENTA - t - (n - 1));
           D.texto(ctx, n, 540, 1050, { tam: 420 + k * 80, alinear: 'center', color: D.PAL.naranja, peso: 800 });
-          D.texto(ctx, solo ? 'Hacé clic (o tocá la barra espaciadora) lo más rápido que puedas' : 'Tocá el botón de tu celu lo más rápido que puedas',
+          D.texto(ctx, solo && !cx.conCelu ? 'Hacé clic (o tocá la barra espaciadora) lo más rápido que puedas' : 'Tocá el botón de tu celu lo más rápido que puedas',
             540, 1250, { tam: 36, alinear: 'center', color: D.PAL.gris, fuente: 'texto', peso: 600 });
           return;
         }
@@ -102,12 +105,23 @@
         if (fase === 'fin') D.texto(ctx, 'Tiempo', 540, 1700, { tam: 120, alinear: 'center', color: D.PAL.naranja, peso: 800 });
       },
       controlCelular(id) {
-        if (fase === 'jugando') return { tipo: 'botones', id: 'toca', titulo: 'Tocá', mensaje: 'Lo más rápido que puedas', columnas: 1, botones: [{ id: 0, color: '#5868AA', texto: 'TOCÁ' }] };
+        if (fase === 'jugando') return { tipo: 'botones', id: 'toca', titulo: 'Tocá', mensaje: 'Lo más rápido que puedas', limite, columnas: 1, botones: [{ id: 0, color: '#5868AA', texto: 'TOCÁ' }] };
         if (fase === 'cuenta') return { tipo: 'espera', id: 'cuenta', titulo: 'Preparate…', mensaje: 'Mirá la tele', grande: 'Ya empieza' };
-        return { tipo: 'espera', id: 'fin', titulo: 'Tiempo', mensaje: `Hiciste ${toques[id] || 0} toques`, grande: `${toques[id] || 0}` };
+        const mios = solo ? toques.solo : (toques[id] || 0);
+        return { tipo: 'espera', id: 'fin', titulo: 'Tiempo', mensaje: `Hiciste ${mios} toques`, grande: `${mios}` };
       },
       terminado() { return fase === 'fin' && finEspera > 1.5; },
       resultados() {
+        if (solo && jugadores[0]) {
+          const n = toques.solo, j = jugadores[0];
+          return {
+            titulo: `${n} toques`,
+            subtitulo: `${(n / DURACION).toFixed(1)} toques por segundo`,
+            filas: [{ nombre: j.nombre, color: j.color, valor: n, destacado: true }],
+            registros: n > 0 ? [{ categoria: 'toques', puntaje: n, jugadorIds: [j.id], detalle: { porSegundo: n / DURACION } }] : [],
+            celular: { [j.id]: { titulo: `${n} toques`, mensaje: `${(n / DURACION).toFixed(1)} por segundo` } },
+          };
+        }
         if (solo) {
           const n = toques.solo;
           return {

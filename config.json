@@ -10,7 +10,7 @@
   "logo": "public/logo.png",
   "puerto": 3000,
   "rotarPantalla": 0,
-  "margenSeguridad": 4,
+  "margenSeguridad": 0,
   "maxJugadores": 6,
   "creditos": "Hecho por 5ºI Informática",
   "memoria": {

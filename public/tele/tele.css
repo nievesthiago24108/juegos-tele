@@ -4,7 +4,7 @@
  * espaciado, línea azul bajo el encabezado, barras de color a la izquierda y esquinas casi rectas.
  */
 * { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+html, body { margin: 0; height: 100%; background: #06111D; overflow: hidden; } /* mismo fondo que el bowling */
 body { color: var(--blanco); font-family: var(--texto); user-select: none; }
 body.sin-cursor, body.sin-cursor * { cursor: none !important; }
 
